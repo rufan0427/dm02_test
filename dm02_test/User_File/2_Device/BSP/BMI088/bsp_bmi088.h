@@ -77,7 +77,7 @@ protected:
     uint64_t TRANSFERING_TIMEOUT = 20;
 
     // 卡方检验残差阈值
-    float ACCEL_CHI_SQUARE_TEST_THRESHOLD = 0.2f;
+    float ACCEL_CHI_SQUARE_TEST_THRESHOLD = 3.0f;
 
     // 角速度合法范围
     float GYRO_VALID_THRESHOLD = 2000.0f * BASIC_MATH_DEG_TO_RAD;

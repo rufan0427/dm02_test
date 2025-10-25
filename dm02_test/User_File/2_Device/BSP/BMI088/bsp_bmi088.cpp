@@ -33,7 +33,7 @@ void Class_BMI088::Init()
 {
     SPI_Manage_Object = &SPI2_Manage_Object;
 
-    BMI088_Accel.Init(true);
+    BMI088_Accel.Init(false);
     BMI088_Gyro.Init();
 
     Init_Finished_Flag = true;
