@@ -132,7 +132,7 @@ protected:
     // 当前温度
     float Now_Temperature = 0.0f;
 
-    // 当前加速度, 单位是一个重力加速度, 即如若z轴向上静置则Raw_Accel_Z=1, 其余为0
+    // 当前加速度
     float Raw_Accel_X = 0.0f;
     float Raw_Accel_Y = 0.0f;
     float Raw_Accel_Z = 0.0f;
@@ -159,6 +159,8 @@ protected:
 };
 
 /* Exported variables --------------------------------------------------------*/
+
+extern const float GRAVITY_ACCELERATION;
 
 extern Class_Power BSP_Power;
 

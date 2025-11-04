@@ -291,25 +291,15 @@ void Task1ms_Callback()
     float origin_gyro_y = BSP_BMI088.BMI088_Gyro.Get_Raw_Gyro_Y();
     float origin_gyro_z = BSP_BMI088.BMI088_Gyro.Get_Raw_Gyro_Z();
     float now_time = SYS_Timestamp.Get_Now_Microsecond() / 1000000.0f;
-    float p00 = BSP_BMI088.EKF_Quaternion.Matrix_P[0][0];
-    float p01 = BSP_BMI088.EKF_Quaternion.Matrix_P[0][1];
-    float p02 = BSP_BMI088.EKF_Quaternion.Matrix_P[0][2];
-    float p03 = BSP_BMI088.EKF_Quaternion.Matrix_P[0][3];
-    float p10 = BSP_BMI088.EKF_Quaternion.Matrix_P[1][0];
-    float p11 = BSP_BMI088.EKF_Quaternion.Matrix_P[1][1];
-    float p12 = BSP_BMI088.EKF_Quaternion.Matrix_P[1][2];
-    float p13 = BSP_BMI088.EKF_Quaternion.Matrix_P[1][3];
-    float p20 = BSP_BMI088.EKF_Quaternion.Matrix_P[2][0];
-    float p21 = BSP_BMI088.EKF_Quaternion.Matrix_P[2][1];
-    float p22 = BSP_BMI088.EKF_Quaternion.Matrix_P[2][2];
-    float p23 = BSP_BMI088.EKF_Quaternion.Matrix_P[2][3];
-    float p30 = BSP_BMI088.EKF_Quaternion.Matrix_P[3][0];
-    float p31 = BSP_BMI088.EKF_Quaternion.Matrix_P[3][1];
-    float p32 = BSP_BMI088.EKF_Quaternion.Matrix_P[3][2];
-    float p33 = BSP_BMI088.EKF_Quaternion.Matrix_P[3][3];
+    float accel_x = BSP_BMI088.Get_Accel()[0][0];
+    float accel_y = BSP_BMI088.Get_Accel()[1][0];
+    float accel_z = BSP_BMI088.Get_Accel()[2][0];
+    float gyro_x = BSP_BMI088.Get_Gyro()[0][0];
+    float gyro_y = BSP_BMI088.Get_Gyro()[1][0];
+    float gyro_z = BSP_BMI088.Get_Gyro()[2][0];
 
     // 串口绘图
-    Vofa_USB.Set_Data(21, &yaw, &pitch, &roll, &q0, &q1, &q2, &q3, &temperature, &calculating_time, &loss, &origin_accel_x, &origin_accel_y, &origin_accel_z, &origin_gyro_x, &origin_gyro_y, &origin_gyro_z, &now_time, &p00, &p11, &p22, &p33);
+    Vofa_USB.Set_Data(23, &yaw, &pitch, &roll, &q0, &q1, &q2, &q3, &temperature, &calculating_time, &loss, &origin_accel_x, &origin_accel_y, &origin_accel_z, &origin_gyro_x, &origin_gyro_y, &origin_gyro_z, &now_time, &accel_x, &accel_y, &accel_z, &gyro_x, &gyro_y, &gyro_z);
     Vofa_USB.TIM_1ms_Write_PeriodElapsedCallback();
 
     TIM_1ms_CAN_PeriodElapsedCallback();

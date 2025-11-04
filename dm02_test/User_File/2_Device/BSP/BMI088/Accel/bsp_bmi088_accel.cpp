@@ -19,6 +19,8 @@
 
 /* Private variables ---------------------------------------------------------*/
 
+const float GRAVITY_ACCELERATION = 9.80665f;
+
 /* Private function declarations ---------------------------------------------*/
 
 /* Function prototypes -------------------------------------------------------*/
@@ -111,9 +113,9 @@ void Class_BMI088_Accel::SPI_RxCpltCallback()
     if (spi_init_address == offsetof(Struct_BMI088_Accel_Register, ACC_X_RO))
     {
         // 读取加速度计数据完成
-        Raw_Accel_X = (float) (Register.ACC_X_RO) / 32768.0f * (1 << (BMI088_ACCEL_RANGE + 1)) * 1.5f;
-        Raw_Accel_Y = (float) (Register.ACC_Y_RO) / 32768.0f * (1 << (BMI088_ACCEL_RANGE + 1)) * 1.5f;
-        Raw_Accel_Z = (float) (Register.ACC_Z_RO) / 32768.0f * (1 << (BMI088_ACCEL_RANGE + 1)) * 1.5f;
+        Raw_Accel_X = (float) (Register.ACC_X_RO) / 32768.0f * (1 << (BMI088_ACCEL_RANGE + 1)) * 1.5f * GRAVITY_ACCELERATION;
+        Raw_Accel_Y = (float) (Register.ACC_Y_RO) / 32768.0f * (1 << (BMI088_ACCEL_RANGE + 1)) * 1.5f * GRAVITY_ACCELERATION;
+        Raw_Accel_Z = (float) (Register.ACC_Z_RO) / 32768.0f * (1 << (BMI088_ACCEL_RANGE + 1)) * 1.5f * GRAVITY_ACCELERATION;
     }
     else if (spi_init_address == offsetof(Struct_BMI088_Accel_Register, TEMP_MSB_RO))
     {

@@ -127,13 +127,12 @@ void Class_BMI088::TIM_125us_Calculate_PeriodElapsedCallback()
         Vector_Original_Gyro[2][0] += GYRO_ZERO_OFFSET[2];
     }
 
-    Vector_Normalized_Accel = Vector_Original_Accel.Get_Normalization();
-
-    // 防止NaN流入算法, 加速度计数据不合法直接丢弃, 陀螺仪数据不合法则使用上次数据
+    // 防止NaN流入算法, 不合法则使用上次数据
     Accel_Valid_Flag = true;
     if (Basic_Math_Is_Invalid_Float(Vector_Original_Accel[0][0]) || Basic_Math_Is_Invalid_Float(Vector_Original_Accel[1][0]) || Basic_Math_Is_Invalid_Float(Vector_Original_Accel[2][0]))
     {
         Accel_Valid_Flag = false;
+        Vector_Original_Accel = Vector_Pre_Original_Accel;
     }
     Gyro_Valid_Flag = true;
     if (Basic_Math_Is_Invalid_Float(Vector_Original_Gyro[0][0]) || Basic_Math_Is_Invalid_Float(Vector_Original_Gyro[1][0]) || Basic_Math_Is_Invalid_Float(Vector_Original_Gyro[2][0]))
@@ -141,24 +140,9 @@ void Class_BMI088::TIM_125us_Calculate_PeriodElapsedCallback()
         Gyro_Valid_Flag = false;
         Vector_Original_Gyro = Vector_Pre_Original_Gyro;
     }
-    else
-    {
-        if (Basic_Math_Abs(Vector_Original_Gyro[0][0]) > GYRO_VALID_THRESHOLD)
-        {
-            Vector_Original_Gyro[0][0] = Vector_Pre_Original_Gyro[0][0];
-            Gyro_Valid_Flag = false;
-        }
-        if (Basic_Math_Abs(Vector_Original_Gyro[1][0]) > GYRO_VALID_THRESHOLD)
-        {
-            Vector_Original_Gyro[1][0] = Vector_Pre_Original_Gyro[1][0];
-            Gyro_Valid_Flag = false;
-        }
-        if (Basic_Math_Abs(Vector_Original_Gyro[2][0]) > GYRO_VALID_THRESHOLD)
-        {
-            Vector_Original_Gyro[2][0] = Vector_Pre_Original_Gyro[2][0];
-            Gyro_Valid_Flag = false;
-        }
-    }
+
+    // 加速度计归一化数据
+    Vector_Normalized_Accel = Vector_Original_Accel.Get_Normalization();
 
     if (!EKF_Init_Finished_Flag && Accel_Update_Flag && Accel_Valid_Flag)
     {
@@ -215,18 +199,28 @@ void Class_BMI088::TIM_125us_Calculate_PeriodElapsedCallback()
         // 然而实测发现是否更新对性能影响不算太大, 更新反而占用了计算时间
         EKF_Quaternion.Vector_X = EKF_Quaternion.Vector_X.Get_Normalization();
 
-
         // 数据输出
 
+        // 获取四元数
         Quarternion = EKF_Quaternion.Vector_X;
+        // 机体坐标系下的重力加速度
+        Class_Matrix_f32<3, 1> vector_gravity = Matrix_Rotation * (-Namespace_ALG_Matrix::Axis_Z_3d() * GRAVITY_ACCELERATION);
 
+        // 输出姿态相关变量
         Vector_Euler_Angle = Quarternion.Get_Euler_Angle();
         Matrix_Rotation = Quarternion.Get_Rotation_Matrix();
-        Vector_Axis_Angle = Quarternion.Get_Rodrigues();
+        Vector_Axis_Angle = Quarternion.Get_Axis_Angle();
+
+        // 输出运动学相关变量
+        Vector_Accel_Body = Vector_Original_Accel + vector_gravity;
+        Vector_Accel = Matrix_Rotation.Get_Transpose() * Vector_Accel_Body;
+        Vector_Gyro_Body = Vector_Original_Gyro;
+        Vector_Gyro = Matrix_Rotation.Get_Transpose() * Vector_Gyro_Body;
 
         Calculating_Time = SYS_Timestamp.Get_Now_Microsecond() - EKF_Now_Timestamp;
 
         EKF_Pre_Timestamp = EKF_Now_Timestamp;
+        Vector_Pre_Original_Accel = Vector_Original_Accel;
         Vector_Pre_Original_Gyro = Vector_Original_Gyro;
     }
 }

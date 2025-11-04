@@ -234,7 +234,7 @@ public:
 
     inline Class_Matrix_f32<3, 3> Get_Rotation_Matrix() const;
 
-    inline Class_Matrix_f32<4, 1> Get_Rodrigues() const;
+    inline Class_Matrix_f32<4, 1> Get_Axis_Angle() const;
 
 protected:
     // 初始化相关常量
@@ -294,7 +294,7 @@ inline float Class_Quaternion_f32::Get_Real() const
  */
 inline Class_Matrix_f32<3, 1> Class_Quaternion_f32::Get_Imaginary() const
 {
-    return (Class_Matrix_f32 < 3, 1 > (&Data[1]));
+    return (Class_Matrix_f32<3, 1>(&Data[1]));
 }
 
 /**
@@ -341,7 +341,7 @@ inline Class_Quaternion_f32 Class_Quaternion_f32::Get_Inverse() const
  */
 inline Class_Matrix_f32<3, 1> Class_Quaternion_f32::Get_Euler_Angle() const
 {
-    Class_Matrix_f32 < 3, 1 > result;
+    Class_Matrix_f32<3, 1> result;
     float modulus_square = Data[0] * Data[0] + Data[1] * Data[1] + Data[2] * Data[2] + Data[3] * Data[3];
     if (modulus_square <= Matrix_Compare_Epsilon)
     {
@@ -380,7 +380,7 @@ inline Class_Matrix_f32<3, 1> Class_Quaternion_f32::Get_Euler_Angle() const
  */
 inline Class_Matrix_f32<4, 4> Class_Quaternion_f32::Get_Self_Matrix() const
 {
-    Class_Matrix_f32 < 4, 4 > result;
+    Class_Matrix_f32<4, 4> result;
     result[0][0] = Data[0];
     result[0][1] = -Data[1];
     result[0][2] = -Data[2];
@@ -407,7 +407,7 @@ inline Class_Matrix_f32<4, 4> Class_Quaternion_f32::Get_Self_Matrix() const
  */
 inline Class_Matrix_f32<3, 3> Class_Quaternion_f32::Get_Rotation_Matrix() const
 {
-    Class_Matrix_f32 < 3, 3 > result;
+    Class_Matrix_f32<3, 3> result;
     float modulus_square = Data[0] * Data[0] + Data[1] * Data[1] + Data[2] * Data[2] + Data[3] + Data[3];
     if (modulus_square <= Matrix_Compare_Epsilon)
     {
@@ -441,18 +441,18 @@ inline Class_Matrix_f32<3, 3> Class_Quaternion_f32::Get_Rotation_Matrix() const
 }
 
 /**
- * @brief 获取四元数对应的轴角表示, Angle-Axis顺序, 轴与x轴正方向夹角为正
+ * @brief 获取四元数对应的轴角表示, Axis-Angle顺序, 轴与x轴正方向夹角为正
  *
- * @return Class_Matrix_f32<4, 1> 轴角表示, Angle-Axis顺序
+ * @return Class_Matrix_f32<4, 1> 轴角表示, Axis-Angle顺序
  * 注意, 这只是用矩阵形式存储, 不可参与矩阵计算
  */
-inline Class_Matrix_f32<4, 1> Class_Quaternion_f32::Get_Rodrigues() const
+inline Class_Matrix_f32<4, 1> Class_Quaternion_f32::Get_Axis_Angle() const
 {
-    Class_Matrix_f32 < 4, 1 > result;
+    Class_Matrix_f32<4, 1> result;
     float modulus_square = Data[0] * Data[0] + Data[1] * Data[1] + Data[2] * Data[2] + Data[3] * Data[3];
     if (modulus_square <= Matrix_Compare_Epsilon)
     {
-        result[1][0] = 1.0f;
+        result[0][0] = 1.0f;
         return (result);
     }
     float modulus = 1.0f / sqrtf(modulus_square);
@@ -460,13 +460,13 @@ inline Class_Matrix_f32<4, 1> Class_Quaternion_f32::Get_Rodrigues() const
     float q1 = Data[1] * modulus;
     float q2 = Data[2] * modulus;
     float q3 = Data[3] * modulus;
-    result[0][0] = 2.0f * acosf(q0);
+    result[3][0] = 2.0f * acosf(q0);
     float sin_half_angle = sqrtf(1.0f - q0 * q0);
     if (sin_half_angle <= Matrix_Compare_Epsilon)
     {
-        result[1][0] = 1.0f;
+        result[0][0] = 1.0f;
+        result[1][0] = 0.0f;
         result[2][0] = 0.0f;
-        result[3][0] = 0.0f;
     }
     else
     {
@@ -475,9 +475,9 @@ inline Class_Matrix_f32<4, 1> Class_Quaternion_f32::Get_Rodrigues() const
         {
             inv_sin_half_angle = -inv_sin_half_angle;
         }
-        result[1][0] = q1 * inv_sin_half_angle;
-        result[2][0] = q2 * inv_sin_half_angle;
-        result[3][0] = q3 * inv_sin_half_angle;
+        result[0][0] = q1 * inv_sin_half_angle;
+        result[1][0] = q2 * inv_sin_half_angle;
+        result[2][0] = q3 * inv_sin_half_angle;
     }
     return (result);
 }

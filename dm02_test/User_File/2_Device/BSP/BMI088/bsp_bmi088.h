@@ -51,6 +51,14 @@ public:
 
     inline Class_Quaternion_f32 Get_Quaternion() const;
 
+    inline Class_Matrix_f32<3, 1> Get_Accel_Body();
+
+    inline Class_Matrix_f32<3, 1> Get_Gyro_Body();
+
+    inline Class_Matrix_f32<3, 1> Get_Accel();
+
+    inline Class_Matrix_f32<3, 1> Get_Gyro();
+
     inline float Get_Accel_Chi_Square_Loss() const;
 
     inline uint64_t Get_Calculating_Time() const;
@@ -78,9 +86,6 @@ protected:
 
     // 卡方检验残差阈值
     float ACCEL_CHI_SQUARE_TEST_THRESHOLD = 3.0f;
-
-    // 角速度合法范围
-    float GYRO_VALID_THRESHOLD = 2000.0f * BASIC_MATH_DEG_TO_RAD;
 
     // 陀螺仪零偏
     const float GYRO_ZERO_OFFSET[3] = {-0.0051174122f, -0.0000833569f, -0.0008265066f};
@@ -115,6 +120,9 @@ protected:
     bool Accel_Valid_Flag = false;
     bool Gyro_Valid_Flag = false;
 
+    // 加速度计归一化数据
+    Class_Matrix_f32<3, 1> Vector_Normalized_Accel;
+
     // EKF计算时间戳
     uint64_t EKF_Now_Timestamp = 0;
     // 上次EKF计算时间戳
@@ -122,8 +130,8 @@ protected:
 
     // 加速度计源数据
     Class_Matrix_f32<3, 1> Vector_Original_Accel;
-    // 加速度计归一化数据
-    Class_Matrix_f32<3, 1> Vector_Normalized_Accel;
+    // 上一次加速度计源数据
+    Class_Matrix_f32<3, 1> Vector_Pre_Original_Accel;
     // 陀螺仪源数据
     Class_Matrix_f32<3, 1> Vector_Original_Gyro;
     // 上一次陀螺仪源数据
@@ -142,6 +150,15 @@ protected:
     Class_Matrix_f32<4, 1> Vector_Axis_Angle;
     // 四元数
     Class_Quaternion_f32 Quarternion;
+
+    // 机体坐标系下的加速度
+    Class_Matrix_f32<3, 1> Vector_Accel_Body;
+    // 机体坐标系下的角速度
+    Class_Matrix_f32<3, 1> Vector_Gyro_Body;
+    // 大地坐标系下的加速度
+    Class_Matrix_f32<3, 1> Vector_Accel;
+    // 大地坐标系下的角速度
+    Class_Matrix_f32<3, 1> Vector_Gyro;
 
     // 卡方检验值
     float Accel_Chi_Square_Loss = 0.0f;
@@ -250,6 +267,42 @@ inline Class_Matrix_f32<3, 1> Class_BMI088::Get_Rodrigues_Axis() const
 inline Class_Quaternion_f32 Class_BMI088::Get_Quaternion() const
 {
     return (Quarternion);
+}
+
+/**
+ * @brief 获取机体坐标系下的加速度
+ *
+ */
+inline Class_Matrix_f32<3, 1> Class_BMI088::Get_Accel_Body()
+{
+    return (Vector_Accel_Body);
+}
+
+/**
+ * @brief 获取机体坐标系下的角速度
+ *
+ */
+inline Class_Matrix_f32<3, 1> Class_BMI088::Get_Gyro_Body()
+{
+    return (Vector_Gyro_Body);
+}
+
+/**
+ * @brief 获取大地坐标系下的加速度
+ *
+ */
+inline Class_Matrix_f32<3, 1> Class_BMI088::Get_Accel()
+{
+    return (Vector_Accel);
+}
+
+/**
+ * @brief 获取大地坐标系下的角速度
+ *
+ */
+inline Class_Matrix_f32<3, 1> Class_BMI088::Get_Gyro()
+{
+    return (Vector_Gyro);
 }
 
 /**
