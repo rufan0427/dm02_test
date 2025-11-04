@@ -183,7 +183,6 @@ void Task1ms_Callback()
 
         BSP_BMI088.TIM_128ms_Calculate_PeriodElapsedCallback();
     }
-
     struct Struct_Mouse_Data
     {
         uint8_t button_left : 1;
@@ -196,29 +195,44 @@ void Task1ms_Callback()
     } __attribute__((__packed__));
     Struct_Mouse_Data mouse_data;
     mouse_data.button_left = 0;
+    if (BSP_Key.Get_Key_Status() == BSP_Key_Status_PRESSED || BSP_Key.Get_Key_Status() == BSP_Key_Status_TRIG_FREE_PRESSED)
+    {
+        mouse_data.button_left = 1;
+    }
+    else
+    {
+        mouse_data.button_left = 0;
+    }
     mouse_data.button_right = 0;
     mouse_data.button_middle = 0;
     mouse_data.reserved = 0;
-    if (BSP_Key.Get_Key_Status() == BSP_Key_Status_PRESSED)
-    {
-        mouse_data.x = 0;
-    }
-    else
-    {
-        int tmp = -BSP_BMI088.BMI088_Gyro.Get_Raw_Gyro_X() * 30.0f;
-        Basic_Math_Constrain(&tmp, -32767, 32767);
-        mouse_data.x = (int16_t) tmp;
-    }
-    if (BSP_Key.Get_Key_Status() == BSP_Key_Status_PRESSED)
-    {
-        mouse_data.y = 0;
-    }
-    else
-    {
-        int tmp = BSP_BMI088.BMI088_Gyro.Get_Raw_Gyro_Y() * 30.0f;
-        Basic_Math_Constrain(&tmp, -32767, 32767);
-        mouse_data.y = (int16_t) tmp;
-    }
+    // if (BSP_Key.Get_Key_Status() == BSP_Key_Status_PRESSED)
+    // {
+    //     mouse_data.x = 0;
+    // }
+    // else
+    // {
+    //     int tmp = -BSP_BMI088.BMI088_Gyro.Get_Raw_Gyro_X() * 30.0f;
+    //     Basic_Math_Constrain(&tmp, -32767, 32767);
+    //     mouse_data.x = (int16_t) tmp;
+    // }
+    // if (BSP_Key.Get_Key_Status() == BSP_Key_Status_PRESSED)
+    // {
+    //     mouse_data.y = 0;
+    // }
+    // else
+    // {
+    //     int tmp = BSP_BMI088.BMI088_Gyro.Get_Raw_Gyro_Y() * 30.0f;
+    //     Basic_Math_Constrain(&tmp, -32767, 32767);
+    //     mouse_data.y = (int16_t) tmp;
+    // }
+    int tmp;
+    tmp = -BSP_BMI088.BMI088_Gyro.Get_Raw_Gyro_X() * 30.0f;
+    Basic_Math_Constrain(&tmp, -32767, 32767);
+    mouse_data.x = (int16_t) tmp;
+    tmp = BSP_BMI088.BMI088_Gyro.Get_Raw_Gyro_Y() * 30.0f;
+    Basic_Math_Constrain(&tmp, -32767, 32767);
+    mouse_data.y = (int16_t) tmp;
     mouse_data.wheel = 0;
     extern USBD_HandleTypeDef hUsbDeviceHS;
     USBD_HID_SendReport(&hUsbDeviceHS, (uint8_t *)&mouse_data, sizeof(mouse_data));
