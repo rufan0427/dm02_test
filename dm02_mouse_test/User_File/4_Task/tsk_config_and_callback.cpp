@@ -194,7 +194,6 @@ void Task1ms_Callback()
         int8_t y;
         int8_t wheel;
     };
-
     Struct_Mouse_Data mouse_data;
     if (BSP_Key.Get_Key_Status() == BSP_Key_Status_PRESSED || BSP_Key.Get_Key_Status() == BSP_Key_Status_TRIG_FREE_PRESSED)
     {
@@ -208,7 +207,9 @@ void Task1ms_Callback()
     mouse_data.button_middle = 0;
     mouse_data.reserved = 0;
     mouse_data.x = -BSP_BMI088.BMI088_Gyro.Get_Raw_Gyro_X() * 15.0f;
+    Basic_Math_Constrain(&mouse_data.x, (int8_t) (-127), (int8_t) (127));
     mouse_data.y = BSP_BMI088.BMI088_Gyro.Get_Raw_Gyro_Y() * 10.0f;
+    Basic_Math_Constrain(&mouse_data.y, (int8_t) (-127), (int8_t) (127));
     mouse_data.wheel = 0;
     extern USBD_HandleTypeDef hUsbDeviceHS;
     USBD_HID_SendReport(&hUsbDeviceHS, (uint8_t *)&mouse_data, sizeof(mouse_data));
