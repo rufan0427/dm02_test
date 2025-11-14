@@ -291,9 +291,9 @@ void Task1ms_Callback()
     float origin_gyro_y = BSP_BMI088.Get_Original_Gyro()[1][0];
     float origin_gyro_z = BSP_BMI088.Get_Original_Gyro()[2][0];
     float now_time = SYS_Timestamp.Get_Now_Microsecond() / 1000000.0f;
-    float accel_x = BSP_BMI088.Get_Accel()[0][0];
-    float accel_y = BSP_BMI088.Get_Accel()[1][0];
-    float accel_z = BSP_BMI088.Get_Accel()[2][0];
+    float accel_x = BSP_BMI088.Get_Accel_Body()[0][0];
+    float accel_y = BSP_BMI088.Get_Accel_Body()[1][0];
+    float accel_z = BSP_BMI088.Get_Accel_Body()[2][0];
     float gyro_x = BSP_BMI088.Get_Gyro()[0][0];
     float gyro_y = BSP_BMI088.Get_Gyro()[1][0];
     float gyro_z = BSP_BMI088.Get_Gyro()[2][0];
