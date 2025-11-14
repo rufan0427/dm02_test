@@ -179,7 +179,7 @@ void Task1ms_Callback()
     {
         mod10 = 0;
 
-        if (red == 100)
+        if (red == 25)
         {
             red_minus_flag = true;
         }
@@ -187,7 +187,7 @@ void Task1ms_Callback()
         {
             red_minus_flag = false;
         }
-        if (green == 100)
+        if (green == 25)
         {
             green_minus_flag = true;
         }
@@ -195,7 +195,7 @@ void Task1ms_Callback()
         {
             green_minus_flag = false;
         }
-        if (blue == 100)
+        if (blue == 25)
         {
             blue_minus_flag = true;
         }
