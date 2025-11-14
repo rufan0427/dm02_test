@@ -179,7 +179,7 @@ void Task1ms_Callback()
     {
         mod10 = 0;
 
-        if (red == 255)
+        if (red == 100)
         {
             red_minus_flag = true;
         }
@@ -187,7 +187,7 @@ void Task1ms_Callback()
         {
             red_minus_flag = false;
         }
-        if (green == 255)
+        if (green == 100)
         {
             green_minus_flag = true;
         }
@@ -195,7 +195,7 @@ void Task1ms_Callback()
         {
             green_minus_flag = false;
         }
-        if (blue == 255)
+        if (blue == 100)
         {
             blue_minus_flag = true;
         }
@@ -274,9 +274,9 @@ void Task1ms_Callback()
     filter_kalman.TIM_Predict_PeriodElapsedCallback();
     filter_kalman.TIM_Update_PeriodElapsedCallback();
 
-    float yaw = BSP_BMI088.Get_Angle_Yaw() / BASIC_MATH_DEG_TO_RAD;
-    float pitch = BSP_BMI088.Get_Angle_Pitch() / BASIC_MATH_DEG_TO_RAD;
-    float roll = BSP_BMI088.Get_Angle_Roll() / BASIC_MATH_DEG_TO_RAD;
+    float yaw = BSP_BMI088.Get_Euler_Angle()[0][0] / BASIC_MATH_DEG_TO_RAD;
+    float pitch = BSP_BMI088.Get_Euler_Angle()[1][0] / BASIC_MATH_DEG_TO_RAD;
+    float roll = BSP_BMI088.Get_Euler_Angle()[2][0] / BASIC_MATH_DEG_TO_RAD;
     float q0 = BSP_BMI088.Get_Quaternion()[0];
     float q1 = BSP_BMI088.Get_Quaternion()[1];
     float q2 = BSP_BMI088.Get_Quaternion()[2];
@@ -284,12 +284,12 @@ void Task1ms_Callback()
     float temperature = BSP_BMI088.BMI088_Accel.Get_Now_Temperature();
     float calculating_time = BSP_BMI088.Get_Calculating_Time();
     float loss = BSP_BMI088.Get_Accel_Chi_Square_Loss();
-    float origin_accel_x = BSP_BMI088.BMI088_Accel.Get_Raw_Accel_X();
-    float origin_accel_y = BSP_BMI088.BMI088_Accel.Get_Raw_Accel_Y();
-    float origin_accel_z = BSP_BMI088.BMI088_Accel.Get_Raw_Accel_Z();
-    float origin_gyro_x = BSP_BMI088.BMI088_Gyro.Get_Raw_Gyro_X();
-    float origin_gyro_y = BSP_BMI088.BMI088_Gyro.Get_Raw_Gyro_Y();
-    float origin_gyro_z = BSP_BMI088.BMI088_Gyro.Get_Raw_Gyro_Z();
+    float origin_accel_x = BSP_BMI088.Get_Original_Accel()[0][0];
+    float origin_accel_y = BSP_BMI088.Get_Original_Accel()[1][0];
+    float origin_accel_z = BSP_BMI088.Get_Original_Accel()[2][0];
+    float origin_gyro_x = BSP_BMI088.Get_Original_Gyro()[0][0];
+    float origin_gyro_y = BSP_BMI088.Get_Original_Gyro()[1][0];
+    float origin_gyro_z = BSP_BMI088.Get_Original_Gyro()[2][0];
     float now_time = SYS_Timestamp.Get_Now_Microsecond() / 1000000.0f;
     float accel_x = BSP_BMI088.Get_Accel()[0][0];
     float accel_y = BSP_BMI088.Get_Accel()[1][0];

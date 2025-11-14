@@ -16,7 +16,7 @@
 
 #include "bsp_bmi088_gyro_register.h"
 #include "1_Middleware/Driver/SPI/drv_spi.h"
-#include "1_Middleware/Algorithm/Basic/alg_basic.h"
+#include "1_Middleware/Algorithm/Matrix/alg_matrix.h"
 #include "stm32h7xx_hal.h"
 
 /* Exported macros -----------------------------------------------------------*/
@@ -45,11 +45,9 @@ class Class_BMI088_Gyro
 public:
     void Init(bool __Heater_Enable = false);
 
-    inline float Get_Raw_Gyro_X() const;
+    inline Class_Matrix_f32<3, 1> Get_Raw_Gyro() const;
 
-    inline float Get_Raw_Gyro_Y() const;
-
-    inline float Get_Raw_Gyro_Z() const;
+    inline Class_Matrix_f32<3, 1> Get_Callibrated_Gyro() const;
 
     void SPI_RxCallback();
 
@@ -95,9 +93,7 @@ protected:
     // 读变量
 
     // 当前角速度
-    float Raw_Gyro_X = 0.0f;
-    float Raw_Gyro_Y = 0.0f;
-    float Raw_Gyro_Z = 0.0f;
+    Class_Matrix_f32<3, 1> Vector_Raw_Gyro;
 
     // 写变量
 
@@ -119,33 +115,13 @@ protected:
 /* Exported function declarations --------------------------------------------*/
 
 /**
- * @brief 获取当前加速度计X轴原始数据
+ * @brief 获取当当前陀螺仪原始数据
  *
- * @return 当前加速度计X轴原始数据
+ * @return 当前陀螺仪原始数据
  */
-inline float Class_BMI088_Gyro::Get_Raw_Gyro_X() const
+inline Class_Matrix_f32<3, 1> Class_BMI088_Gyro::Get_Raw_Gyro() const
 {
-    return (Raw_Gyro_X);
-}
-
-/**
- * @brief 获取当前加速度计Y轴原始数据
- *
- * @return 当前加速度计Y轴原始数据
- */
-inline float Class_BMI088_Gyro::Get_Raw_Gyro_Y() const
-{
-    return (Raw_Gyro_Y);
-}
-
-/**
- * @brief 获取当前加速度计Z轴原始数据
- *
- * @return 当前加速度计Z轴原始数据
- */
-inline float Class_BMI088_Gyro::Get_Raw_Gyro_Z() const
-{
-    return (Raw_Gyro_Z);
+    return (Vector_Raw_Gyro);
 }
 
 #endif

@@ -423,7 +423,7 @@ inline Class_Matrix_f32<column, row> Class_Matrix_f32<row, column>::Get_Transpos
         }
     }
 
-    return (Class_Matrix_f32<column, row>(result[0]));
+    return (result);
 }
 
 /**

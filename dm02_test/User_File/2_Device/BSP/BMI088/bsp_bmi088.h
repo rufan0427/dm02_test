@@ -37,17 +37,15 @@ public:
 
     void Init();
 
-    inline float Get_Angle_Yaw() const;
+    inline Class_Matrix_f32<3, 1> Get_Original_Accel() const;
 
-    inline float Get_Angle_Pitch() const;
+    inline Class_Matrix_f32<3, 1> Get_Original_Gyro() const;
 
-    inline float Get_Angle_Roll() const;
+    inline Class_Matrix_f32<3, 1> Get_Euler_Angle() const;
 
     inline Class_Matrix_f32<3, 3> Get_Rotation_Matrix() const;
 
-    inline float Get_Rodrigues_Angle() const;
-
-    inline Class_Matrix_f32<3, 1> Get_Rodrigues_Axis() const;
+    inline Class_Matrix_f32<4, 1> Get_Axis_Angle() const;
 
     inline Class_Quaternion_f32 Get_Quaternion() const;
 
@@ -87,8 +85,13 @@ protected:
     // 卡方检验残差阈值
     float ACCEL_CHI_SQUARE_TEST_THRESHOLD = 3.0f;
 
-    // 陀螺仪零偏
-    const float GYRO_ZERO_OFFSET[3] = {-0.0051174122f, -0.0000833569f, -0.0008265066f};
+    // 校正数据, 与温控有关, 温控在50℃
+    // 加速度计仿射矩阵源数据
+    const float ACCEL_AFFINE_DATA[9] = {0.9969368940944301f, -0.00016337623390829805f, -0.0006400641797057123f, -0.00016337623390829805f, 0.9948369705624311f, 0.0011557559733320157f, -0.0006400641797057123f, 0.0011557559733320157f, 0.9926904682240895f};
+    // 加速度计偏置
+    const float ACCEL_BIAS_DATA[3] = {0.0019960670246710736f, 0.008487169268823742f, 0.014307717443059566f};
+    // 陀螺仪偏置
+    const float GYRO_ZERO_OFFSET[3] = {-0.005280993487f, -0.000237223741f, -0.000647540528f};
 
     // 内部变量
 
@@ -120,6 +123,9 @@ protected:
     bool Accel_Valid_Flag = false;
     bool Gyro_Valid_Flag = false;
 
+    // 上一次陀螺仪源数据
+    Class_Matrix_f32<3, 1> Vector_Pre_Original_Gyro;
+
     // 加速度计归一化数据
     Class_Matrix_f32<3, 1> Vector_Normalized_Accel;
 
@@ -128,19 +134,15 @@ protected:
     // 上次EKF计算时间戳
     uint64_t EKF_Pre_Timestamp = 0;
 
-    // 加速度计源数据
-    Class_Matrix_f32<3, 1> Vector_Original_Accel;
-    // 上一次加速度计源数据
-    Class_Matrix_f32<3, 1> Vector_Pre_Original_Accel;
-    // 陀螺仪源数据
-    Class_Matrix_f32<3, 1> Vector_Original_Gyro;
-    // 上一次陀螺仪源数据
-    Class_Matrix_f32<3, 1> Vector_Pre_Original_Gyro;
-
     // 时间差
     float D_T = 0.000125f;
 
     // 读变量
+
+    // 加速度计源数据
+    Class_Matrix_f32<3, 1> Vector_Original_Accel;
+    // 陀螺仪源数据
+    Class_Matrix_f32<3, 1> Vector_Original_Gyro;
 
     // 欧拉角, Yaw-Pitch-Roll顺序
     Class_Matrix_f32<3, 1> Vector_Euler_Angle;
@@ -200,38 +202,39 @@ extern Class_BMI088 BSP_BMI088;
 /* Exported function declarations --------------------------------------------*/
 
 /**
- * @brief 获取偏航角
+ * @brief 获取加速度计原始数据
  *
- * @return 偏航角, 单位rad
+ * @return 加速度计原始数据, 单位m/s²
  */
-inline float Class_BMI088::Get_Angle_Yaw() const
+inline Class_Matrix_f32<3, 1> Class_BMI088::Get_Original_Accel() const
 {
-    return (Vector_Euler_Angle[0][0]);
+    return (Vector_Original_Accel);
 }
 
 /**
- * @brief 获取俯仰角
+ * @brief 获取陀螺仪原始数据
  *
- * @return 俯仰角, 单位rad
+ * @return 陀螺仪原始数据, 单位rad/s
  */
-inline float Class_BMI088::Get_Angle_Pitch() const
+inline Class_Matrix_f32<3, 1> Class_BMI088::Get_Original_Gyro() const
 {
-    return (Vector_Euler_Angle[1][0]);
+    return (Vector_Original_Gyro);
 }
 
 /**
- * @brief 获取横滚角
+ * @brief 获取Euler角
  *
- * @return 横滚角, 单位rad
+ * @return Euler角, 单位rad
  */
-inline float Class_BMI088::Get_Angle_Roll() const
+inline Class_Matrix_f32<3, 1> Class_BMI088::Get_Euler_Angle() const
 {
-    return (Vector_Euler_Angle[2][0]);
+    return (Vector_Euler_Angle);
 }
 
 /**
  * @brief 获取旋转矩阵
  *
+ * @return 旋转矩阵
  */
 inline Class_Matrix_f32<3, 3> Class_BMI088::Get_Rotation_Matrix() const
 {
@@ -239,25 +242,13 @@ inline Class_Matrix_f32<3, 3> Class_BMI088::Get_Rotation_Matrix() const
 }
 
 /**
- * @brief 获取轴角式的角度
- *
- */
-inline float Class_BMI088::Get_Rodrigues_Angle() const
-{
-    return (Vector_Axis_Angle[0][0]);
-}
-
-/**
  * @brief 获取轴角式的轴
  *
+ * @return 轴角式
  */
-inline Class_Matrix_f32<3, 1> Class_BMI088::Get_Rodrigues_Axis() const
+inline Class_Matrix_f32<4, 1> Class_BMI088::Get_Axis_Angle() const
 {
-    Class_Matrix_f32<3, 1> result;
-    result[0][0] = Vector_Axis_Angle[1][0];
-    result[1][0] = Vector_Axis_Angle[2][0];
-    result[2][0] = Vector_Axis_Angle[3][0];
-    return (result);
+    return (Vector_Axis_Angle);
 }
 
 /**
