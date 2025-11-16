@@ -179,7 +179,7 @@ void Task1ms_Callback()
     {
         mod10 = 0;
 
-        if (red == 25)
+        if (red == 10)
         {
             red_minus_flag = true;
         }
@@ -187,7 +187,7 @@ void Task1ms_Callback()
         {
             red_minus_flag = false;
         }
-        if (green == 25)
+        if (green == 10)
         {
             green_minus_flag = true;
         }
@@ -195,7 +195,7 @@ void Task1ms_Callback()
         {
             green_minus_flag = false;
         }
-        if (blue == 25)
+        if (blue == 10)
         {
             blue_minus_flag = true;
         }
@@ -257,7 +257,7 @@ void Task1ms_Callback()
 
         motor.TIM_100ms_Alive_PeriodElapsedCallback();
     }
-    motor.Set_Target_Current(0.5f);
+    motor.Set_Target_Omega(0.5f);
     motor.TIM_Calculate_PeriodElapsedCallback();
 
     static int mod128 = 0;
@@ -291,15 +291,27 @@ void Task1ms_Callback()
     float origin_gyro_y = BSP_BMI088.Get_Original_Gyro()[1][0];
     float origin_gyro_z = BSP_BMI088.Get_Original_Gyro()[2][0];
     float now_time = SYS_Timestamp.Get_Now_Microsecond() / 1000000.0f;
-    float accel_x = BSP_BMI088.Get_Accel_Body()[0][0];
-    float accel_y = BSP_BMI088.Get_Accel_Body()[1][0];
-    float accel_z = BSP_BMI088.Get_Accel_Body()[2][0];
+    float accel_x = BSP_BMI088.Get_Accel()[0][0];
+    float accel_y = BSP_BMI088.Get_Accel()[1][0];
+    float accel_z = BSP_BMI088.Get_Accel()[2][0];
     float gyro_x = BSP_BMI088.Get_Gyro()[0][0];
     float gyro_y = BSP_BMI088.Get_Gyro()[1][0];
     float gyro_z = BSP_BMI088.Get_Gyro()[2][0];
+    float rotation_matrix_r00 = BSP_BMI088.Get_Rotation_Matrix()[0][0];
+    float rotation_matrix_r01 = BSP_BMI088.Get_Rotation_Matrix()[0][1];
+    float rotation_matrix_r02 = BSP_BMI088.Get_Rotation_Matrix()[0][2];
+    float rotation_matrix_r10 = BSP_BMI088.Get_Rotation_Matrix()[1][0];
+    float rotation_matrix_r11 = BSP_BMI088.Get_Rotation_Matrix()[1][1];
+    float rotation_matrix_r12 = BSP_BMI088.Get_Rotation_Matrix()[1][2];
+    float rotation_matrix_r20 = BSP_BMI088.Get_Rotation_Matrix()[2][0];
+    float rotation_matrix_r21 = BSP_BMI088.Get_Rotation_Matrix()[2][1];
+    float rotation_matrix_r22 = BSP_BMI088.Get_Rotation_Matrix()[2][2];
 
     // 串口绘图
+    // 常规显示
     Vofa_USB.Set_Data(23, &yaw, &pitch, &roll, &q0, &q1, &q2, &q3, &temperature, &calculating_time, &loss, &origin_accel_x, &origin_accel_y, &origin_accel_z, &origin_gyro_x, &origin_gyro_y, &origin_gyro_z, &now_time, &accel_x, &accel_y, &accel_z, &gyro_x, &gyro_y, &gyro_z);
+    // 临时调试
+    // Vofa_USB.Set_Data(9, &rotation_matrix_r00, &rotation_matrix_r01, &rotation_matrix_r02, &rotation_matrix_r10, &rotation_matrix_r11, &rotation_matrix_r12, &rotation_matrix_r20, &rotation_matrix_r21, &rotation_matrix_r22);
     Vofa_USB.TIM_1ms_Write_PeriodElapsedCallback();
 
     TIM_1ms_CAN_PeriodElapsedCallback();
@@ -364,7 +376,8 @@ void Task_Init()
 
     BSP_BMI088.Init();
 
-    motor.Init(&hfdcan1, Motor_DJI_ID_0x201, Motor_DJI_Control_Method_CURRENT);
+    motor.PID_Omega.Init(5.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+    motor.Init(&hfdcan1, Motor_DJI_ID_0x201, Motor_DJI_Control_Method_OMEGA);
     A[0][0] = 1.0f;
     A[0][1] = 0.001f;
     A[1][0] = 0.0f;
@@ -393,7 +406,7 @@ void Task_Init()
 
     BSP_W25Q64JV.Init();
 
-    Namespace_SYS_Timestamp::Delay_Second(2);
+    Namespace_SYS_Timestamp::Delay_Second(1);
 
     // 标记初始化完成
     init_finished = true;
