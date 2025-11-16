@@ -140,6 +140,8 @@ void Class_BMI088::TIM_125us_Calculate_PeriodElapsedCallback()
     // 加速度计归一化数据
     Vector_Normalized_Accel = Vector_Original_Accel.Get_Normalization();
 
+
+    // EKF初始化与计算
     if (!EKF_Init_Finished_Flag && Accel_Update_Flag && Accel_Valid_Flag)
     {
         // EKF相关变量与函数

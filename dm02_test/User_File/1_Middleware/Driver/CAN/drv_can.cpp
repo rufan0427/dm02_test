@@ -200,15 +200,24 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
         // 也得接收, 防止FIFO满
         if (hfdcan->Instance == FDCAN1)
         {
-            HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &CAN1_Manage_Object.Rx_Header, CAN1_Manage_Object.Rx_Buffer);
+            while (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &CAN1_Manage_Object.Rx_Header, CAN1_Manage_Object.Rx_Buffer) == HAL_OK)
+            {
+
+            }
         }
         else if (hfdcan->Instance == FDCAN2)
         {
-            HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &CAN2_Manage_Object.Rx_Header, CAN2_Manage_Object.Rx_Buffer);
+            while (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &CAN2_Manage_Object.Rx_Header, CAN2_Manage_Object.Rx_Buffer) == HAL_OK)
+            {
+
+            }
         }
         else if (hfdcan->Instance == FDCAN3)
         {
-            HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &CAN3_Manage_Object.Rx_Header, CAN3_Manage_Object.Rx_Buffer);
+            while (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &CAN3_Manage_Object.Rx_Header, CAN3_Manage_Object.Rx_Buffer) == HAL_OK)
+            {
+
+            }
         }
         return;
     }
@@ -216,32 +225,38 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
     // 选择回调函数
     if (hfdcan->Instance == FDCAN1)
     {
-        HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &CAN1_Manage_Object.Rx_Header, CAN1_Manage_Object.Rx_Buffer);
-        CAN1_Manage_Object.Rx_Timestamp = SYS_Timestamp.Get_Current_Timestamp();
-
-        if (CAN1_Manage_Object.Callback_Function != nullptr)
+        while (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &CAN1_Manage_Object.Rx_Header, CAN1_Manage_Object.Rx_Buffer) == HAL_OK)
         {
-            CAN1_Manage_Object.Callback_Function(CAN1_Manage_Object.Rx_Header, CAN1_Manage_Object.Rx_Buffer);
+            CAN1_Manage_Object.Rx_Timestamp = SYS_Timestamp.Get_Current_Timestamp();
+
+            if (CAN1_Manage_Object.Callback_Function != nullptr)
+            {
+                CAN1_Manage_Object.Callback_Function(CAN1_Manage_Object.Rx_Header, CAN1_Manage_Object.Rx_Buffer);
+            }
         }
     }
     else if (hfdcan->Instance == FDCAN2)
     {
-        HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &CAN2_Manage_Object.Rx_Header, CAN2_Manage_Object.Rx_Buffer);
-        CAN2_Manage_Object.Rx_Timestamp = SYS_Timestamp.Get_Current_Timestamp();
-
-        if (CAN2_Manage_Object.Callback_Function != nullptr)
+        while (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &CAN2_Manage_Object.Rx_Header, CAN2_Manage_Object.Rx_Buffer) == HAL_OK)
         {
-            CAN2_Manage_Object.Callback_Function(CAN2_Manage_Object.Rx_Header, CAN2_Manage_Object.Rx_Buffer);
+            CAN2_Manage_Object.Rx_Timestamp = SYS_Timestamp.Get_Current_Timestamp();
+
+            if (CAN2_Manage_Object.Callback_Function != nullptr)
+            {
+                CAN2_Manage_Object.Callback_Function(CAN2_Manage_Object.Rx_Header, CAN2_Manage_Object.Rx_Buffer);
+            }
         }
     }
     else if (hfdcan->Instance == FDCAN3)
     {
-        HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &CAN3_Manage_Object.Rx_Header, CAN3_Manage_Object.Rx_Buffer);
-        CAN3_Manage_Object.Rx_Timestamp = SYS_Timestamp.Get_Current_Timestamp();
-
-        if (CAN3_Manage_Object.Callback_Function != nullptr)
+        while (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &CAN3_Manage_Object.Rx_Header, CAN3_Manage_Object.Rx_Buffer) == HAL_OK)
         {
-            CAN3_Manage_Object.Callback_Function(CAN3_Manage_Object.Rx_Header, CAN3_Manage_Object.Rx_Buffer);
+            CAN3_Manage_Object.Rx_Timestamp = SYS_Timestamp.Get_Current_Timestamp();
+
+            if (CAN3_Manage_Object.Callback_Function != nullptr)
+            {
+                CAN3_Manage_Object.Callback_Function(CAN3_Manage_Object.Rx_Header, CAN3_Manage_Object.Rx_Buffer);
+            }
         }
     }
 }
@@ -256,17 +271,27 @@ void HAL_FDCAN_RxFifo1Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo1ITs)
     // 判断程序初始化完成
     if (!init_finished)
     {
+        // 也得接收, 防止FIFO满
         if (hfdcan->Instance == FDCAN1)
         {
-            HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO1, &CAN1_Manage_Object.Rx_Header, CAN1_Manage_Object.Rx_Buffer);
+            while (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO1, &CAN1_Manage_Object.Rx_Header, CAN1_Manage_Object.Rx_Buffer) == HAL_OK)
+            {
+
+            }
         }
         else if (hfdcan->Instance == FDCAN2)
         {
-            HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO1, &CAN2_Manage_Object.Rx_Header, CAN2_Manage_Object.Rx_Buffer);
+            while (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO1, &CAN2_Manage_Object.Rx_Header, CAN2_Manage_Object.Rx_Buffer) == HAL_OK)
+            {
+
+            }
         }
         else if (hfdcan->Instance == FDCAN3)
         {
-            HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO1, &CAN3_Manage_Object.Rx_Header, CAN3_Manage_Object.Rx_Buffer);
+            while (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO1, &CAN3_Manage_Object.Rx_Header, CAN3_Manage_Object.Rx_Buffer) == HAL_OK)
+            {
+
+            }
         }
         return;
     }
@@ -274,32 +299,38 @@ void HAL_FDCAN_RxFifo1Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo1ITs)
     // 选择回调函数
     if (hfdcan->Instance == FDCAN1)
     {
-        HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO1, &CAN1_Manage_Object.Rx_Header, CAN1_Manage_Object.Rx_Buffer);
-        CAN1_Manage_Object.Rx_Timestamp = SYS_Timestamp.Get_Current_Timestamp();
-
-        if (CAN1_Manage_Object.Callback_Function != nullptr)
+        while (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO1, &CAN1_Manage_Object.Rx_Header, CAN1_Manage_Object.Rx_Buffer) == HAL_OK)
         {
-            CAN1_Manage_Object.Callback_Function(CAN1_Manage_Object.Rx_Header, CAN1_Manage_Object.Rx_Buffer);
+            CAN1_Manage_Object.Rx_Timestamp = SYS_Timestamp.Get_Current_Timestamp();
+
+            if (CAN1_Manage_Object.Callback_Function != nullptr)
+            {
+                CAN1_Manage_Object.Callback_Function(CAN1_Manage_Object.Rx_Header, CAN1_Manage_Object.Rx_Buffer);
+            }
         }
     }
     else if (hfdcan->Instance == FDCAN2)
     {
-        HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO1, &CAN2_Manage_Object.Rx_Header, CAN2_Manage_Object.Rx_Buffer);
-        CAN2_Manage_Object.Rx_Timestamp = SYS_Timestamp.Get_Current_Timestamp();
-
-        if (CAN2_Manage_Object.Callback_Function != nullptr)
+        while (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO1, &CAN2_Manage_Object.Rx_Header, CAN2_Manage_Object.Rx_Buffer) == HAL_OK)
         {
-            CAN2_Manage_Object.Callback_Function(CAN2_Manage_Object.Rx_Header, CAN2_Manage_Object.Rx_Buffer);
+            CAN2_Manage_Object.Rx_Timestamp = SYS_Timestamp.Get_Current_Timestamp();
+
+            if (CAN2_Manage_Object.Callback_Function != nullptr)
+            {
+                CAN2_Manage_Object.Callback_Function(CAN2_Manage_Object.Rx_Header, CAN2_Manage_Object.Rx_Buffer);
+            }
         }
     }
     else if (hfdcan->Instance == FDCAN3)
     {
-        HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO1, &CAN3_Manage_Object.Rx_Header, CAN3_Manage_Object.Rx_Buffer);
-        CAN3_Manage_Object.Rx_Timestamp = SYS_Timestamp.Get_Current_Timestamp();
-
-        if (CAN3_Manage_Object.Callback_Function != nullptr)
+        while (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO1, &CAN3_Manage_Object.Rx_Header, CAN3_Manage_Object.Rx_Buffer) == HAL_OK)
         {
-            CAN3_Manage_Object.Callback_Function(CAN3_Manage_Object.Rx_Header, CAN3_Manage_Object.Rx_Buffer);
+            CAN3_Manage_Object.Rx_Timestamp = SYS_Timestamp.Get_Current_Timestamp();
+
+            if (CAN3_Manage_Object.Callback_Function != nullptr)
+            {
+                CAN3_Manage_Object.Callback_Function(CAN3_Manage_Object.Rx_Header, CAN3_Manage_Object.Rx_Buffer);
+            }
         }
     }
 }

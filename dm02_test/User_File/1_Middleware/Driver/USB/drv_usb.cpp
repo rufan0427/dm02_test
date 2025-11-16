@@ -65,6 +65,13 @@ uint8_t USB_Transmit_Data(uint8_t *Data, uint16_t Length)
  */
 void USB_ReceiveCallback(uint16_t Size)
 {
+    if (!init_finished)
+    {
+        USBD_CDC_SetRxBuffer(&hUsbDeviceHS, USB0_Manage_Object.Rx_Buffer_Active);
+        USBD_CDC_ReceivePacket(&hUsbDeviceHS);
+        return;
+    }
+
     // 自设双缓冲USB
     USB0_Manage_Object.Rx_Buffer_Ready = USB0_Manage_Object.Rx_Buffer_Active;
     if (USB0_Manage_Object.Rx_Buffer_Active == USB0_Manage_Object.Rx_Buffer_0)

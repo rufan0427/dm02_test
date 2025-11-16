@@ -211,6 +211,47 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
     // 判断程序初始化完成
     if (!init_finished)
     {
+        // 重启接收
+        if (huart->Instance == USART1)
+        {
+            HAL_UARTEx_ReceiveToIdle_DMA(huart, UART1_Manage_Object.Rx_Buffer_Active, UART_BUFFER_SIZE);
+        }
+        else if (huart->Instance == USART2)
+        {
+            HAL_UARTEx_ReceiveToIdle_DMA(huart, UART2_Manage_Object.Rx_Buffer_Active, UART_BUFFER_SIZE);
+        }
+        else if (huart->Instance == USART3)
+        {
+            HAL_UARTEx_ReceiveToIdle_DMA(huart, UART3_Manage_Object.Rx_Buffer_Active, UART_BUFFER_SIZE);
+        }
+        else if (huart->Instance == UART4)
+        {
+            HAL_UARTEx_ReceiveToIdle_DMA(huart, UART4_Manage_Object.Rx_Buffer_Active, UART_BUFFER_SIZE);
+        }
+        else if (huart->Instance == UART5)
+        {
+            HAL_UARTEx_ReceiveToIdle_DMA(huart, UART5_Manage_Object.Rx_Buffer_Active, UART_BUFFER_SIZE);
+        }
+        else if (huart->Instance == USART6)
+        {
+            HAL_UARTEx_ReceiveToIdle_DMA(huart, UART6_Manage_Object.Rx_Buffer_Active, UART_BUFFER_SIZE);
+        }
+        else if (huart->Instance == UART7)
+        {
+            HAL_UARTEx_ReceiveToIdle_DMA(huart, UART7_Manage_Object.Rx_Buffer_Active, UART_BUFFER_SIZE);
+        }
+        else if (huart->Instance == UART8)
+        {
+            HAL_UARTEx_ReceiveToIdle_DMA(huart, UART8_Manage_Object.Rx_Buffer_Active, UART_BUFFER_SIZE);
+        }
+        else if (huart->Instance == UART9)
+        {
+            HAL_UARTEx_ReceiveToIdle_DMA(huart, UART9_Manage_Object.Rx_Buffer_Active, UART_BUFFER_SIZE);
+        }
+        else if (huart->Instance == USART10)
+        {
+            HAL_UARTEx_ReceiveToIdle_DMA(huart, UART10_Manage_Object.Rx_Buffer_Active, UART_BUFFER_SIZE);
+        }
         return;
     }
 
