@@ -310,8 +310,6 @@ void Task1ms_Callback()
     // 串口绘图
     // 常规显示
     Vofa_USB.Set_Data(23, &yaw, &pitch, &roll, &q0, &q1, &q2, &q3, &temperature, &calculating_time, &loss, &origin_accel_x, &origin_accel_y, &origin_accel_z, &origin_gyro_x, &origin_gyro_y, &origin_gyro_z, &now_time, &accel_x, &accel_y, &accel_z, &gyro_x, &gyro_y, &gyro_z);
-    // 临时调试
-    // Vofa_USB.Set_Data(9, &rotation_matrix_r00, &rotation_matrix_r01, &rotation_matrix_r02, &rotation_matrix_r10, &rotation_matrix_r11, &rotation_matrix_r12, &rotation_matrix_r20, &rotation_matrix_r21, &rotation_matrix_r22);
     Vofa_USB.TIM_1ms_Write_PeriodElapsedCallback();
 
     TIM_1ms_CAN_PeriodElapsedCallback();
@@ -405,8 +403,6 @@ void Task_Init()
     filter_kalman.Init(A, B, H, Q, R, P);
 
     BSP_W25Q64JV.Init();
-
-    Namespace_SYS_Timestamp::Delay_Second(1);
 
     // 标记初始化完成
     init_finished = true;
