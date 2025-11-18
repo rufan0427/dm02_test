@@ -82,6 +82,9 @@ protected:
     // 数据传输超时时间, 单位us
     uint64_t TRANSFERING_TIMEOUT = 20;
 
+    // D_T超时时间阈值
+    float D_T_TIMEOUT_THRESHOLD = 0.1f;
+
     // 卡方检验残差阈值
     float ACCEL_CHI_SQUARE_TEST_THRESHOLD = 3.0f;
 
@@ -119,9 +122,6 @@ protected:
     uint64_t Accel_Update_Timestamp = 0;
     bool Gyro_Update_Flag = false;
     uint64_t Gyro_Update_Timestamp = 0;
-    // 数据合法标志
-    bool Accel_Valid_Flag = false;
-    bool Gyro_Valid_Flag = false;
 
     // 上一次陀螺仪源数据
     Class_Matrix_f32<3, 1> Vector_Pre_Original_Gyro;
