@@ -118,6 +118,15 @@ void Class_BMI088_Accel::SPI_RxCpltCallback()
         Vector_Raw_Accel[0][0] = (float) (Register.ACC_X_RO) / 32768.0f * (1 << (BMI088_ACCEL_RANGE + 1)) * 1.5f * GRAVITY_ACCELERATION;
         Vector_Raw_Accel[1][0] = (float) (Register.ACC_Y_RO) / 32768.0f * (1 << (BMI088_ACCEL_RANGE + 1)) * 1.5f * GRAVITY_ACCELERATION;
         Vector_Raw_Accel[2][0] = (float) (Register.ACC_Z_RO) / 32768.0f * (1 << (BMI088_ACCEL_RANGE + 1)) * 1.5f * GRAVITY_ACCELERATION;
+
+        if (Basic_Math_Is_Invalid_Float(Vector_Raw_Accel[0][0]) || Basic_Math_Is_Invalid_Float(Vector_Raw_Accel[1][0]) || Basic_Math_Is_Invalid_Float(Vector_Raw_Accel[2][0]))
+        {
+            Valid_Flag = false;
+        }
+        else
+        {
+            Valid_Flag = true;
+        }
     }
     else if (spi_init_address == offsetof(Struct_BMI088_Accel_Register, TEMP_MSB_RO))
     {

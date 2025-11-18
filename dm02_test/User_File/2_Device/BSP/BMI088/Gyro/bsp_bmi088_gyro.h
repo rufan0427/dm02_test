@@ -43,7 +43,9 @@ enum Enum_BSP_BMI088_Gyro_Range : uint8_t
 class Class_BMI088_Gyro
 {
 public:
-    void Init(bool __Heater_Enable = false);
+    void Init();
+
+    inline bool Get_Valid_Flag() const;
 
     inline Class_Matrix_f32<3, 1> Get_Raw_Gyro() const;
 
@@ -92,6 +94,8 @@ protected:
 
     // 读变量
 
+    // 当前陀螺仪是否有效
+    bool Valid_Flag = true;
     // 当前角速度
     Class_Matrix_f32<3, 1> Vector_Raw_Gyro;
 
@@ -113,6 +117,16 @@ protected:
 /* Exported variables --------------------------------------------------------*/
 
 /* Exported function declarations --------------------------------------------*/
+
+/**
+ * @brief 获取当前陀螺仪是否有效
+ *
+ * @return 当前陀螺仪是否有效
+ */
+inline bool Class_BMI088_Gyro::Get_Valid_Flag() const
+{
+    return (Valid_Flag);
+}
 
 /**
  * @brief 获取当当前陀螺仪原始数据

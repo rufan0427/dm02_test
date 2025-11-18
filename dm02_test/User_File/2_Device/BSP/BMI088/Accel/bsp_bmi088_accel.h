@@ -51,6 +51,8 @@ public:
 
     inline float Get_Now_Temperature() const;
 
+    inline bool Get_Valid_Flag() const;
+
     inline Class_Matrix_f32<3, 1> Get_Raw_Accel() const;
 
     inline float Get_Heater_Enable() const;
@@ -89,7 +91,7 @@ protected:
     // 初始化指令数
     const uint8_t BMI088_ACCEL_INIT_INSTRUCTION_NUM = 6;
     // 加速度计量程, 默认±24g
-    const Enum_BSP_BMI088_Accel_Range BMI088_ACCEL_RANGE = BMI088_ACCEL_RANGE_24G;
+    const Enum_BSP_BMI088_Accel_Range BMI088_ACCEL_RANGE = BMI088_ACCEL_RANGE_3G;
     // 寄存器配置相关
     const uint8_t BMI088_GYRO_REGISTER_CONFIG[6][2] = {
         // 开启加速度计电源
@@ -128,6 +130,8 @@ protected:
     // 当前温度
     float Now_Temperature = 0.0f;
 
+    // 当前加速度是否有效
+    bool Valid_Flag = true;
     // 当前加速度
     Class_Matrix_f32<3, 1> Vector_Raw_Accel;;
 
@@ -168,6 +172,16 @@ extern Class_Power BSP_Power;
 inline float Class_BMI088_Accel::Get_Now_Temperature() const
 {
     return (Now_Temperature);
+}
+
+/**
+ * @brief 获取当前加速度是否有效
+ *
+ * @return 当前加速度是否有效
+ */
+inline bool Class_BMI088_Accel::Get_Valid_Flag() const
+{
+    return (Valid_Flag);
 }
 
 /**
