@@ -86,7 +86,7 @@ protected:
     float D_T_TIMEOUT_THRESHOLD = 0.1f;
 
     // 卡方检验残差阈值
-    float ACCEL_CHI_SQUARE_TEST_THRESHOLD = 3.0f;
+    float ACCEL_CHI_SQUARE_TEST_THRESHOLD = 5.0f;
 
     // 校正数据, 与温控有关, 温控在50℃
     // 加速度计仿射矩阵源数据
