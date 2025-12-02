@@ -91,7 +91,7 @@ protected:
     // 初始化指令数
     const uint8_t BMI088_ACCEL_INIT_INSTRUCTION_NUM = 6;
     // 加速度计量程, 默认±24g
-    const Enum_BSP_BMI088_Accel_Range BMI088_ACCEL_RANGE = BMI088_ACCEL_RANGE_3G;
+    const Enum_BSP_BMI088_Accel_Range BMI088_ACCEL_RANGE = BMI088_ACCEL_RANGE_24G;
     // 寄存器配置相关
     const uint8_t BMI088_GYRO_REGISTER_CONFIG[6][2] = {
         // 开启加速度计电源
