@@ -45,7 +45,7 @@ bool green_minus_flag = false;
 bool blue_minus_flag = true;
 
 // 大疆电机3508
-Class_Motor_DJI_C620 motor;
+Class_Motor_DJI_GM6020 motor;
 // Kalman滤波器
 Class_Filter_Kalman filter_kalman;
 // 相关矩阵
@@ -123,7 +123,7 @@ void CAN1_Callback(FDCAN_RxHeaderTypeDef &Header, uint8_t *Buffer)
 {
     switch (Header.Identifier)
     {
-    case (0x201):
+    case (0x206):
     {
         motor.CAN_RxCpltCallback();
 
@@ -257,7 +257,8 @@ void Task1ms_Callback()
 
         motor.TIM_100ms_Alive_PeriodElapsedCallback();
     }
-    motor.Set_Target_Omega(0.5f);
+    // motor.Set_Target_Angle(fmodf(SYS_Timestamp.Get_Now_Second(), 10.0f) > 5.0f ? 0.0f : 1.0f * PI);
+    motor.Set_Target_Angle(1.0f * PI);
     motor.TIM_Calculate_PeriodElapsedCallback();
 
     static int mod128 = 0;
@@ -306,10 +307,18 @@ void Task1ms_Callback()
     float rotation_matrix_r20 = BSP_BMI088.Get_Rotation_Matrix()[2][0];
     float rotation_matrix_r21 = BSP_BMI088.Get_Rotation_Matrix()[2][1];
     float rotation_matrix_r22 = BSP_BMI088.Get_Rotation_Matrix()[2][2];
+    float motor_target_angle = motor.Get_Target_Angle();
+    float motor_now_angle = motor.Get_Now_Angle();
+    float motor_target_omega = motor.Get_Target_Omega();
+    float motor_now_omega = motor.Get_Now_Omega();
+    float motor_target_torque = motor.Get_Target_Torque();
+    float motor_now_torque = motor.Get_Now_Torque();
+    float filter_omega = filter_kalman.Vector_X[1][0];
 
     // 串口绘图
-    // 常规显示
-    Vofa_USB.Set_Data(23, &yaw, &pitch, &roll, &q0, &q1, &q2, &q3, &temperature, &calculating_time, &loss, &origin_accel_x, &origin_accel_y, &origin_accel_z, &origin_gyro_x, &origin_gyro_y, &origin_gyro_z, &now_time, &accel_x, &accel_y, &accel_z, &gyro_x, &gyro_y, &gyro_z);
+    // IMU常规显示
+    // Vofa_USB.Set_Data(23, &yaw, &pitch, &roll, &q0, &q1, &q2, &q3, &temperature, &calculating_time, &loss, &origin_accel_x, &origin_accel_y, &origin_accel_z, &origin_gyro_x, &origin_gyro_y, &origin_gyro_z, &now_time, &accel_x, &accel_y, &accel_z, &gyro_x, &gyro_y, &gyro_z);
+    Vofa_USB.Set_Data(7, &motor_target_angle, &motor_now_angle, &motor_target_omega, &motor_now_omega, &motor_target_torque, &motor_now_torque, &filter_omega);
     Vofa_USB.TIM_1ms_Write_PeriodElapsedCallback();
 
     TIM_1ms_CAN_PeriodElapsedCallback();
@@ -374,8 +383,9 @@ void Task_Init()
 
     BSP_BMI088.Init();
 
-    motor.PID_Omega.Init(5.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-    motor.Init(&hfdcan1, Motor_DJI_ID_0x201, Motor_DJI_Control_Method_OMEGA);
+    motor.PID_Angle.Init(12.0f, 0.0f, 0.0f, 0.0f, 10.0f, 10.0f);
+    motor.PID_Omega.Init(0.03f, 5.0f, 0.0f, 0.0f, 0.2f, 0.2f);
+    motor.Init(&hfdcan1, Motor_DJI_ID_0x206, Motor_DJI_Control_Method_ANGLE, 0, PI / 6);
     A[0][0] = 1.0f;
     A[0][1] = 0.001f;
     A[1][0] = 0.0f;
