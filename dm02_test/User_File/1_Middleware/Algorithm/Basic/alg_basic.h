@@ -55,6 +55,8 @@ float Basic_Math_Int_To_Float(int32_t x, int32_t Int_1, int32_t Int_2, float Flo
 
 bool Basic_Math_Is_Invalid_Float(float x);
 
+float Basic_Math_Modulus_Normalization(float x, float modulus);
+
 /**
  * @brief 限幅函数
  *
@@ -112,29 +114,6 @@ template<typename Type>
 Type Basic_Math_Abs(Type x)
 {
     return ((x > 0) ? x : -x);
-}
-
-/**
- * @brief 求取模归化
- *
- * @tparam Type 类型
- * @param x 传入数据
- * @param modulus 模数
- * @return Type 返回的归化数, 介于 ±modulus / 2 之间
- */
-template<typename Type>
-Type Basic_Math_Modulus_Normalization(Type x, Type modulus)
-{
-    float tmp;
-
-    tmp = fmod(x + modulus / 2.0f, modulus);
-
-    if (tmp < 0.0f)
-    {
-        tmp += modulus;
-    }
-
-    return (tmp - modulus / 2.0f);
 }
 
 #endif

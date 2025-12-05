@@ -262,4 +262,25 @@ bool Basic_Math_Is_Invalid_Float(float x)
     return (false);
 }
 
+/**
+ * @brief 求取模归化
+ *
+ * @param x 传入数据
+ * @param modulus 模数
+ * @return 返回的归化数, 介于 ±modulus / 2 之间
+ */
+float Basic_Math_Modulus_Normalization(float x, float modulus)
+{
+    float tmp;
+
+    tmp = fmod(x + modulus / 2.0f, modulus);
+
+    if (tmp < 0.0f)
+    {
+        tmp += modulus;
+    }
+
+    return (tmp - modulus / 2.0f);
+}
+
 /************************ COPYRIGHT(C) USTC-ROBOWALKER **************************/
