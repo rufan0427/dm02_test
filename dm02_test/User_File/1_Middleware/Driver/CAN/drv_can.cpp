@@ -86,21 +86,11 @@ void can_filter_mask_config(FDCAN_HandleTypeDef *hfdcan)
     can_filter_init_structure.FilterID2 = 0x00000000;
     HAL_FDCAN_ConfigFilter(hfdcan, &can_filter_init_structure);
 
-    // 配置fifo1全通滤波器
-    can_filter_init_structure.IdType = FDCAN_STANDARD_ID;
-    can_filter_init_structure.FilterIndex = 1;
-    can_filter_init_structure.FilterType = FDCAN_FILTER_MASK;
-    can_filter_init_structure.FilterConfig = FDCAN_FILTER_TO_RXFIFO1;
-    can_filter_init_structure.FilterID1 = 0x00000000;
-    can_filter_init_structure.FilterID2 = 0x00000000;
-    HAL_FDCAN_ConfigFilter(hfdcan, &can_filter_init_structure);
-
     // 全局滤波器, 直接拒绝不符合规则的标准数据帧, 扩展数据帧, 标准遥控帧, 扩展遥控帧
     HAL_FDCAN_ConfigGlobalFilter(hfdcan, FDCAN_REJECT, FDCAN_REJECT, FDCAN_FILTER_REMOTE, FDCAN_FILTER_REMOTE);
 
     // 启动CAN中断与总线
-    HAL_FDCAN_ActivateNotification(hfdcan, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
-    HAL_FDCAN_ActivateNotification(hfdcan, FDCAN_IT_RX_FIFO1_NEW_MESSAGE, 0);
+    HAL_FDCAN_ActivateNotification(hfdcan, FDCAN_IT_RX_FIFO0_NEW_MESSAGE | FDCAN_IT_BUS_OFF | FDCAN_IT_ERROR_PASSIVE | FDCAN_IT_ARB_PROTOCOL_ERROR | FDCAN_IT_DATA_PROTOCOL_ERROR, 0);
 }
 
 /**
@@ -184,7 +174,7 @@ void TIM_1ms_CAN_PeriodElapsedCallback()
         // CAN_Transmit_Data(&hfdcan2, 0x1fe, CAN2_0x1fe_Tx_Data, 8);
     }
 
-    CAN_Transmit_Data(&hfdcan1, 0x200, CAN1_0x200_Tx_Data, 8);
+    CAN_Transmit_Data(&hfdcan1, 0x1fe, CAN1_0x1fe_Tx_Data, 8);
 }
 
 /**
@@ -262,77 +252,14 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 }
 
 /**
- * @brief HAL库CAN接收FIFO1中断
+ * @brief HAL库CAN错误中断
  *
  * @param hfdcan CAN编号
+ * @param ErrorStatusITs 错误状态
  */
-void HAL_FDCAN_RxFifo1Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo1ITs)
+void HAL_FDCAN_ErrorStatusCallback(FDCAN_HandleTypeDef *hfdcan, uint32_t ErrorStatusITs)
 {
-    // 判断程序初始化完成
-    if (!init_finished)
-    {
-        // 也得接收, 防止FIFO满
-        if (hfdcan->Instance == FDCAN1)
-        {
-            while (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO1, &CAN1_Manage_Object.Rx_Header, CAN1_Manage_Object.Rx_Buffer) == HAL_OK)
-            {
 
-            }
-        }
-        else if (hfdcan->Instance == FDCAN2)
-        {
-            while (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO1, &CAN2_Manage_Object.Rx_Header, CAN2_Manage_Object.Rx_Buffer) == HAL_OK)
-            {
-
-            }
-        }
-        else if (hfdcan->Instance == FDCAN3)
-        {
-            while (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO1, &CAN3_Manage_Object.Rx_Header, CAN3_Manage_Object.Rx_Buffer) == HAL_OK)
-            {
-
-            }
-        }
-        return;
-    }
-
-    // 选择回调函数
-    if (hfdcan->Instance == FDCAN1)
-    {
-        while (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO1, &CAN1_Manage_Object.Rx_Header, CAN1_Manage_Object.Rx_Buffer) == HAL_OK)
-        {
-            CAN1_Manage_Object.Rx_Timestamp = SYS_Timestamp.Get_Current_Timestamp();
-
-            if (CAN1_Manage_Object.Callback_Function != nullptr)
-            {
-                CAN1_Manage_Object.Callback_Function(CAN1_Manage_Object.Rx_Header, CAN1_Manage_Object.Rx_Buffer);
-            }
-        }
-    }
-    else if (hfdcan->Instance == FDCAN2)
-    {
-        while (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO1, &CAN2_Manage_Object.Rx_Header, CAN2_Manage_Object.Rx_Buffer) == HAL_OK)
-        {
-            CAN2_Manage_Object.Rx_Timestamp = SYS_Timestamp.Get_Current_Timestamp();
-
-            if (CAN2_Manage_Object.Callback_Function != nullptr)
-            {
-                CAN2_Manage_Object.Callback_Function(CAN2_Manage_Object.Rx_Header, CAN2_Manage_Object.Rx_Buffer);
-            }
-        }
-    }
-    else if (hfdcan->Instance == FDCAN3)
-    {
-        while (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO1, &CAN3_Manage_Object.Rx_Header, CAN3_Manage_Object.Rx_Buffer) == HAL_OK)
-        {
-            CAN3_Manage_Object.Rx_Timestamp = SYS_Timestamp.Get_Current_Timestamp();
-
-            if (CAN3_Manage_Object.Callback_Function != nullptr)
-            {
-                CAN3_Manage_Object.Callback_Function(CAN3_Manage_Object.Rx_Header, CAN3_Manage_Object.Rx_Buffer);
-            }
-        }
-    }
 }
 
 /************************ COPYRIGHT(C) USTC-ROBOWALKER **************************/
