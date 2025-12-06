@@ -227,10 +227,10 @@ void Task1ms_Callback()
     //     mouse_data.y = (int16_t) tmp;
     // }
     int tmp;
-    tmp = -BSP_BMI088.BMI088_Gyro.Get_Raw_Gyro_X() * 15.0f;
+    tmp = -BSP_BMI088.BMI088_Gyro.Get_Raw_Gyro()[0][0] * 15.0f;
     Basic_Math_Constrain(&tmp, -32767, 32767);
     mouse_data.x = (int16_t) tmp;
-    tmp = BSP_BMI088.BMI088_Gyro.Get_Raw_Gyro_Y() * 15.0f;
+    tmp = BSP_BMI088.BMI088_Gyro.Get_Raw_Gyro()[1][0] * 15.0f;
     Basic_Math_Constrain(&tmp, -32767, 32767);
     mouse_data.y = (int16_t) tmp;
     mouse_data.wheel = 0;

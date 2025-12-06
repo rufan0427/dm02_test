@@ -28,7 +28,7 @@
  *
  * @param Heater_Enable 是否使能加热电阻
  */
-void Class_BMI088_Gyro::Init(bool __Heater_Enable)
+void Class_BMI088_Gyro::Init()
 {
     // 绑定SPI
     SPI_Manage_Object = &SPI2_Manage_Object;
@@ -94,10 +94,20 @@ void Class_BMI088_Gyro::SPI_RxCallback()
     // 处理数据
     if (spi_init_address == offsetof(Struct_BMI088_Gyro_Register, RATE_X_RO))
     {
-        // 读取加速度计数据完成
-        Raw_Gyro_X = (float) (Register.RATE_X_RO) / 32768.0f * (1 << (4 - BMI088_GYRO_RANGE)) * 125.0f * BASIC_MATH_DEG_TO_RAD;
-        Raw_Gyro_Y = (float) (Register.RATE_Y_RO) / 32768.0f * (1 << (4 - BMI088_GYRO_RANGE)) * 125.0f * BASIC_MATH_DEG_TO_RAD;
-        Raw_Gyro_Z = (float) (Register.RATE_Z_RO) / 32768.0f * (1 << (4 - BMI088_GYRO_RANGE)) * 125.0f * BASIC_MATH_DEG_TO_RAD;
+        // 读取陀螺仪数据完成
+
+        Vector_Raw_Gyro[0][0] = (float) (Register.RATE_X_RO) / 32768.0f * (1 << (4 - BMI088_GYRO_RANGE)) * 125.0f * BASIC_MATH_DEG_TO_RAD;
+        Vector_Raw_Gyro[1][0] = (float) (Register.RATE_Y_RO) / 32768.0f * (1 << (4 - BMI088_GYRO_RANGE)) * 125.0f * BASIC_MATH_DEG_TO_RAD;
+        Vector_Raw_Gyro[2][0] = (float) (Register.RATE_Z_RO) / 32768.0f * (1 << (4 - BMI088_GYRO_RANGE)) * 125.0f * BASIC_MATH_DEG_TO_RAD;
+
+        if (Basic_Math_Is_Invalid_Float(Vector_Raw_Gyro[0][0]) || Basic_Math_Is_Invalid_Float(Vector_Raw_Gyro[1][0]) || Basic_Math_Is_Invalid_Float(Vector_Raw_Gyro[2][0]))
+        {
+            Valid_Flag = false;
+        }
+        else
+        {
+            Valid_Flag = true;
+        }
     }
 }
 

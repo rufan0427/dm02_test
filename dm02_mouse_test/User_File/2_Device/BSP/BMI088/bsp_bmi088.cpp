@@ -33,8 +33,11 @@ void Class_BMI088::Init()
 {
     SPI_Manage_Object = &SPI2_Manage_Object;
 
-    BMI088_Accel.Init(false);
+    BMI088_Accel.Init(true);
     BMI088_Gyro.Init();
+
+    // 欧拉角需要辅助初始化EKF, 第一次初始化默认Yaw是0
+    Vector_Euler_Angle[0][0] = 0.0f;
 
     Init_Finished_Flag = true;
 }
@@ -113,54 +116,29 @@ void Class_BMI088::TIM_125us_Calculate_PeriodElapsedCallback()
 {
     EKF_Now_Timestamp = SYS_Timestamp.Get_Now_Microsecond();
 
-    Vector_Original_Accel[0][0] = BMI088_Accel.Get_Raw_Accel_X();
-    Vector_Original_Accel[1][0] = BMI088_Accel.Get_Raw_Accel_Y();
-    Vector_Original_Accel[2][0] = BMI088_Accel.Get_Raw_Accel_Z();
+    Vector_Original_Accel = BMI088_Accel.Get_Raw_Accel();
+    Vector_Original_Gyro = BMI088_Gyro.Get_Raw_Gyro();
 
-    Vector_Original_Gyro[0][0] = BMI088_Gyro.Get_Raw_Gyro_X();
-    Vector_Original_Gyro[1][0] = BMI088_Gyro.Get_Raw_Gyro_Y();
-    Vector_Original_Gyro[2][0] = BMI088_Gyro.Get_Raw_Gyro_Z();
-    if (BMI088_Accel.Get_Heater_Enable())
+    // 角速度合法则保存, 不合法则使用上次的数据
+    if (!BMI088_Gyro.Get_Valid_Flag())
     {
-        Vector_Original_Gyro[0][0] += GYRO_ZERO_OFFSET[0];
-        Vector_Original_Gyro[1][0] += GYRO_ZERO_OFFSET[1];
-        Vector_Original_Gyro[2][0] += GYRO_ZERO_OFFSET[2];
-    }
-
-    Vector_Normalized_Accel = Vector_Original_Accel.Get_Normalization();
-
-    // 防止NaN流入算法, 加速度计数据不合法直接丢弃, 陀螺仪数据不合法则使用上次数据
-    Accel_Valid_Flag = true;
-    if (Basic_Math_Is_Invalid_Float(Vector_Original_Accel[0][0]) || Basic_Math_Is_Invalid_Float(Vector_Original_Accel[1][0]) || Basic_Math_Is_Invalid_Float(Vector_Original_Accel[2][0]))
-    {
-        Accel_Valid_Flag = false;
-    }
-    Gyro_Valid_Flag = true;
-    if (Basic_Math_Is_Invalid_Float(Vector_Original_Gyro[0][0]) || Basic_Math_Is_Invalid_Float(Vector_Original_Gyro[1][0]) || Basic_Math_Is_Invalid_Float(Vector_Original_Gyro[2][0]))
-    {
-        Gyro_Valid_Flag = false;
         Vector_Original_Gyro = Vector_Pre_Original_Gyro;
     }
-    else
+
+    // 如果加热电阻使能, 则进行零偏修正
+    if (BMI088_Accel.Get_Heater_Enable())
     {
-        if (Basic_Math_Abs(Vector_Original_Gyro[0][0]) > GYRO_VALID_THRESHOLD)
-        {
-            Vector_Original_Gyro[0][0] = Vector_Pre_Original_Gyro[0][0];
-            Gyro_Valid_Flag = false;
-        }
-        if (Basic_Math_Abs(Vector_Original_Gyro[1][0]) > GYRO_VALID_THRESHOLD)
-        {
-            Vector_Original_Gyro[1][0] = Vector_Pre_Original_Gyro[1][0];
-            Gyro_Valid_Flag = false;
-        }
-        if (Basic_Math_Abs(Vector_Original_Gyro[2][0]) > GYRO_VALID_THRESHOLD)
-        {
-            Vector_Original_Gyro[2][0] = Vector_Pre_Original_Gyro[2][0];
-            Gyro_Valid_Flag = false;
-        }
+        Vector_Original_Accel = (Class_Matrix_f32<3, 3>(ACCEL_AFFINE_DATA) * Vector_Original_Accel / GRAVITY_ACCELERATION + Class_Matrix_f32<3, 1>(ACCEL_BIAS_DATA)) * GRAVITY_ACCELERATION;
+
+        Vector_Original_Gyro = Vector_Original_Gyro + Class_Matrix_f32<3, 1>(GYRO_ZERO_OFFSET);
     }
 
-    if (!EKF_Init_Finished_Flag && Accel_Update_Flag && Accel_Valid_Flag)
+    // 加速度计归一化数据
+    Vector_Normalized_Accel = Vector_Original_Accel.Get_Normalization();
+
+
+    // EKF初始化与计算
+    if (!EKF_Init_Finished_Flag && Accel_Update_Flag && BMI088_Accel.Get_Valid_Flag())
     {
         // EKF相关变量与函数
 
@@ -173,7 +151,21 @@ void Class_BMI088::TIM_125us_Calculate_PeriodElapsedCallback()
         // 初始状态协方差矩阵
         Class_Matrix_f32<4, 4> matrix_p = Namespace_ALG_Matrix::Identity<4, 4>();
         // 初始状态向量
-        Class_Matrix_f32<4, 1> vector_x = Namespace_ALG_Quaternion::From_Vector(Vector_Normalized_Accel);
+        Class_Matrix_f32<4, 1> vector_x;
+        float half_yaw = Vector_Euler_Angle[0][0] * 0.5f;
+        float half_roll = atan2f(Vector_Normalized_Accel[1][0], Vector_Normalized_Accel[2][0]) * 0.5f;
+        float half_pitch = asinf(-Vector_Normalized_Accel[0][0]) * 0.5f;
+        float cy = cosf(half_yaw);
+        float sy = sinf(half_yaw);
+        float cp = cosf(half_pitch);
+        float sp = sinf(half_pitch);
+        float cr = cosf(half_roll);
+        float sr = sinf(half_roll);
+        vector_x[0][0] = cy * cp * cr + sy * sp * sr;
+        vector_x[1][0] = cy * cp * sr - sy * sp * cr;
+        vector_x[2][0] = sy * cp * sr + cy * sp * cr;
+        vector_x[3][0] = sy * cp * cr - cy * sp * sr;
+        vector_x = vector_x.Get_Normalization();
 
         EKF_Quaternion.Init(matrix_q, matrix_r, matrix_p, vector_x);
 
@@ -191,6 +183,12 @@ void Class_BMI088::TIM_125us_Calculate_PeriodElapsedCallback()
     {
         // 设置时间差
         D_T = (EKF_Now_Timestamp - EKF_Pre_Timestamp) / 1000000.0f;
+        // 若时间差不合法, 则重新初始化EKF
+        if (D_T <= 0.0f || D_T > D_T_TIMEOUT_THRESHOLD)
+        {
+            EKF_Init_Finished_Flag = false;
+            return;
+        }
         EKF_Quaternion.Set_D_T(D_T);
 
         // EKF预测
@@ -198,7 +196,7 @@ void Class_BMI088::TIM_125us_Calculate_PeriodElapsedCallback()
         EKF_Quaternion.TIM_Predict_PeriodElapsedCallback();
 
         // EKF更新
-        if (Accel_Update_Flag && Accel_Valid_Flag)
+        if (Accel_Update_Flag && BMI088_Accel.Get_Valid_Flag())
         {
             Accel_Chi_Square_Calculate();
             if (Accel_Chi_Square_Loss <= ACCEL_CHI_SQUARE_TEST_THRESHOLD)
@@ -215,19 +213,32 @@ void Class_BMI088::TIM_125us_Calculate_PeriodElapsedCallback()
         // 然而实测发现是否更新对性能影响不算太大, 更新反而占用了计算时间
         EKF_Quaternion.Vector_X = EKF_Quaternion.Vector_X.Get_Normalization();
 
-
         // 数据输出
 
+        // 获取四元数
         Quarternion = EKF_Quaternion.Vector_X;
 
+        // 输出姿态相关变量
         Vector_Euler_Angle = Quarternion.Get_Euler_Angle();
         Matrix_Rotation = Quarternion.Get_Rotation_Matrix();
-        Vector_Axis_Angle = Quarternion.Get_Rodrigues();
+        Vector_Axis_Angle = Quarternion.Get_Axis_Angle();
+
+        // 机体坐标系下的重力加速度
+        Class_Matrix_f32<3, 1> vector_gravity_body = Matrix_Rotation.Get_Transpose() * (-Namespace_ALG_Matrix::Axis_Z_3d() * GRAVITY_ACCELERATION);
+
+        // 输出运动学相关变量
+        Vector_Accel_Body = Vector_Original_Accel + vector_gravity_body;
+        Vector_Accel = Matrix_Rotation * Vector_Accel_Body;
+        Vector_Gyro_Body = Vector_Original_Gyro;
+        Vector_Gyro = Matrix_Rotation * Vector_Gyro_Body;
 
         Calculating_Time = SYS_Timestamp.Get_Now_Microsecond() - EKF_Now_Timestamp;
 
+        if (BMI088_Gyro.Get_Valid_Flag())
+        {
+            Vector_Pre_Original_Gyro = Vector_Original_Gyro;
+        }
         EKF_Pre_Timestamp = EKF_Now_Timestamp;
-        Vector_Pre_Original_Gyro = Vector_Original_Gyro;
     }
 }
 

@@ -37,19 +37,25 @@ public:
 
     void Init();
 
-    inline float Get_Angle_Yaw() const;
+    inline Class_Matrix_f32<3, 1> Get_Original_Accel() const;
 
-    inline float Get_Angle_Pitch() const;
+    inline Class_Matrix_f32<3, 1> Get_Original_Gyro() const;
 
-    inline float Get_Angle_Roll() const;
+    inline Class_Matrix_f32<3, 1> Get_Euler_Angle() const;
 
     inline Class_Matrix_f32<3, 3> Get_Rotation_Matrix() const;
 
-    inline float Get_Rodrigues_Angle() const;
-
-    inline Class_Matrix_f32<3, 1> Get_Rodrigues_Axis() const;
+    inline Class_Matrix_f32<4, 1> Get_Axis_Angle() const;
 
     inline Class_Quaternion_f32 Get_Quaternion() const;
+
+    inline Class_Matrix_f32<3, 1> Get_Accel_Body();
+
+    inline Class_Matrix_f32<3, 1> Get_Gyro_Body();
+
+    inline Class_Matrix_f32<3, 1> Get_Accel();
+
+    inline Class_Matrix_f32<3, 1> Get_Gyro();
 
     inline float Get_Accel_Chi_Square_Loss() const;
 
@@ -76,14 +82,19 @@ protected:
     // 数据传输超时时间, 单位us
     uint64_t TRANSFERING_TIMEOUT = 20;
 
+    // D_T超时时间阈值
+    float D_T_TIMEOUT_THRESHOLD = 0.1f;
+
     // 卡方检验残差阈值
-    float ACCEL_CHI_SQUARE_TEST_THRESHOLD = 3.0f;
+    float ACCEL_CHI_SQUARE_TEST_THRESHOLD = 5.0f;
 
-    // 角速度合法范围
-    float GYRO_VALID_THRESHOLD = 2000.0f * BASIC_MATH_DEG_TO_RAD;
-
-    // 陀螺仪零偏
-    const float GYRO_ZERO_OFFSET[3] = {-0.0051174122f, -0.0000833569f, -0.0008265066f};
+    // 校正数据, 与温控有关, 温控在50℃
+    // 加速度计仿射矩阵源数据
+    const float ACCEL_AFFINE_DATA[9] = {0.9813826498493404f, 0.17232440504057203f, 0.027984325323801115f, -0.1690535919907899f, 0.9747302115792275f, -0.10336863799715153f, -0.046825636945091266f, 0.09953521655990044f, 0.986897809387138f};
+    // 加速度计偏置
+    const float ACCEL_BIAS_DATA[3] = {0.0038458286072392397, 0.00647039594993548f, 0.014968990490337293f};
+    // 陀螺仪偏置
+    const float GYRO_ZERO_OFFSET[3] = {-0.005280993487f, -0.000237223741f, -0.000647540528f};
 
     // 内部变量
 
@@ -111,28 +122,27 @@ protected:
     uint64_t Accel_Update_Timestamp = 0;
     bool Gyro_Update_Flag = false;
     uint64_t Gyro_Update_Timestamp = 0;
-    // 数据合法标志
-    bool Accel_Valid_Flag = false;
-    bool Gyro_Valid_Flag = false;
+
+    // 上一次陀螺仪源数据
+    Class_Matrix_f32<3, 1> Vector_Pre_Original_Gyro;
+
+    // 加速度计归一化数据
+    Class_Matrix_f32<3, 1> Vector_Normalized_Accel;
 
     // EKF计算时间戳
     uint64_t EKF_Now_Timestamp = 0;
     // 上次EKF计算时间戳
     uint64_t EKF_Pre_Timestamp = 0;
 
-    // 加速度计源数据
-    Class_Matrix_f32<3, 1> Vector_Original_Accel;
-    // 加速度计归一化数据
-    Class_Matrix_f32<3, 1> Vector_Normalized_Accel;
-    // 陀螺仪源数据
-    Class_Matrix_f32<3, 1> Vector_Original_Gyro;
-    // 上一次陀螺仪源数据
-    Class_Matrix_f32<3, 1> Vector_Pre_Original_Gyro;
-
     // 时间差
     float D_T = 0.000125f;
 
     // 读变量
+
+    // 加速度计源数据
+    Class_Matrix_f32<3, 1> Vector_Original_Accel;
+    // 陀螺仪源数据
+    Class_Matrix_f32<3, 1> Vector_Original_Gyro;
 
     // 欧拉角, Yaw-Pitch-Roll顺序
     Class_Matrix_f32<3, 1> Vector_Euler_Angle;
@@ -142,6 +152,15 @@ protected:
     Class_Matrix_f32<4, 1> Vector_Axis_Angle;
     // 四元数
     Class_Quaternion_f32 Quarternion;
+
+    // 机体坐标系下的加速度
+    Class_Matrix_f32<3, 1> Vector_Accel_Body;
+    // 机体坐标系下的角速度
+    Class_Matrix_f32<3, 1> Vector_Gyro_Body;
+    // 大地坐标系下的加速度
+    Class_Matrix_f32<3, 1> Vector_Accel;
+    // 大地坐标系下的角速度
+    Class_Matrix_f32<3, 1> Vector_Gyro;
 
     // 卡方检验值
     float Accel_Chi_Square_Loss = 0.0f;
@@ -183,38 +202,39 @@ extern Class_BMI088 BSP_BMI088;
 /* Exported function declarations --------------------------------------------*/
 
 /**
- * @brief 获取偏航角
+ * @brief 获取加速度计原始数据
  *
- * @return 偏航角, 单位rad
+ * @return 加速度计原始数据, 单位m/s²
  */
-inline float Class_BMI088::Get_Angle_Yaw() const
+inline Class_Matrix_f32<3, 1> Class_BMI088::Get_Original_Accel() const
 {
-    return (Vector_Euler_Angle[0][0]);
+    return (Vector_Original_Accel);
 }
 
 /**
- * @brief 获取俯仰角
+ * @brief 获取陀螺仪原始数据
  *
- * @return 俯仰角, 单位rad
+ * @return 陀螺仪原始数据, 单位rad/s
  */
-inline float Class_BMI088::Get_Angle_Pitch() const
+inline Class_Matrix_f32<3, 1> Class_BMI088::Get_Original_Gyro() const
 {
-    return (Vector_Euler_Angle[1][0]);
+    return (Vector_Original_Gyro);
 }
 
 /**
- * @brief 获取横滚角
+ * @brief 获取Euler角
  *
- * @return 横滚角, 单位rad
+ * @return Euler角, 单位rad
  */
-inline float Class_BMI088::Get_Angle_Roll() const
+inline Class_Matrix_f32<3, 1> Class_BMI088::Get_Euler_Angle() const
 {
-    return (Vector_Euler_Angle[2][0]);
+    return (Vector_Euler_Angle);
 }
 
 /**
  * @brief 获取旋转矩阵
  *
+ * @return 旋转矩阵
  */
 inline Class_Matrix_f32<3, 3> Class_BMI088::Get_Rotation_Matrix() const
 {
@@ -222,25 +242,13 @@ inline Class_Matrix_f32<3, 3> Class_BMI088::Get_Rotation_Matrix() const
 }
 
 /**
- * @brief 获取轴角式的角度
- *
- */
-inline float Class_BMI088::Get_Rodrigues_Angle() const
-{
-    return (Vector_Axis_Angle[0][0]);
-}
-
-/**
  * @brief 获取轴角式的轴
  *
+ * @return 轴角式
  */
-inline Class_Matrix_f32<3, 1> Class_BMI088::Get_Rodrigues_Axis() const
+inline Class_Matrix_f32<4, 1> Class_BMI088::Get_Axis_Angle() const
 {
-    Class_Matrix_f32<3, 1> result;
-    result[0][0] = Vector_Axis_Angle[1][0];
-    result[1][0] = Vector_Axis_Angle[2][0];
-    result[2][0] = Vector_Axis_Angle[3][0];
-    return (result);
+    return (Vector_Axis_Angle);
 }
 
 /**
@@ -250,6 +258,42 @@ inline Class_Matrix_f32<3, 1> Class_BMI088::Get_Rodrigues_Axis() const
 inline Class_Quaternion_f32 Class_BMI088::Get_Quaternion() const
 {
     return (Quarternion);
+}
+
+/**
+ * @brief 获取机体坐标系下的加速度
+ *
+ */
+inline Class_Matrix_f32<3, 1> Class_BMI088::Get_Accel_Body()
+{
+    return (Vector_Accel_Body);
+}
+
+/**
+ * @brief 获取机体坐标系下的角速度
+ *
+ */
+inline Class_Matrix_f32<3, 1> Class_BMI088::Get_Gyro_Body()
+{
+    return (Vector_Gyro_Body);
+}
+
+/**
+ * @brief 获取大地坐标系下的加速度
+ *
+ */
+inline Class_Matrix_f32<3, 1> Class_BMI088::Get_Accel()
+{
+    return (Vector_Accel);
+}
+
+/**
+ * @brief 获取大地坐标系下的角速度
+ *
+ */
+inline Class_Matrix_f32<3, 1> Class_BMI088::Get_Gyro()
+{
+    return (Vector_Gyro);
 }
 
 /**

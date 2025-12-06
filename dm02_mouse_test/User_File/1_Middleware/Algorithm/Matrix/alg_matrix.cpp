@@ -28,7 +28,7 @@ float Matrix_Compare_Epsilon = 1e-6f;
  */
 Class_Matrix_f32<2, 1> Namespace_ALG_Matrix::Axis_X_2d()
 {
-    Class_Matrix_f32 < 2, 1 > result;
+    Class_Matrix_f32<2, 1> result;
     result[0][0] = 1.0f;
     result[1][0] = 0.0f;
     return (result);
@@ -40,7 +40,7 @@ Class_Matrix_f32<2, 1> Namespace_ALG_Matrix::Axis_X_2d()
  */
 Class_Matrix_f32<2, 1> Namespace_ALG_Matrix::Axis_Y_2d()
 {
-    Class_Matrix_f32 < 2, 1 > result;
+    Class_Matrix_f32<2, 1> result;
     result[0][0] = 0.0f;
     result[1][0] = 1.0f;
     return (result);
@@ -52,7 +52,7 @@ Class_Matrix_f32<2, 1> Namespace_ALG_Matrix::Axis_Y_2d()
  */
 Class_Matrix_f32<3, 1> Namespace_ALG_Matrix::Axis_X_3d()
 {
-    Class_Matrix_f32 < 3, 1 > result;
+    Class_Matrix_f32<3, 1> result;
     result[0][0] = 1.0f;
     result[1][0] = 0.0f;
     result[2][0] = 0.0f;
@@ -65,7 +65,7 @@ Class_Matrix_f32<3, 1> Namespace_ALG_Matrix::Axis_X_3d()
  */
 Class_Matrix_f32<3, 1> Namespace_ALG_Matrix::Axis_Y_3d()
 {
-    Class_Matrix_f32 < 3, 1 > result;
+    Class_Matrix_f32<3, 1> result;
     result[0][0] = 0.0f;
     result[1][0] = 1.0f;
     result[2][0] = 0.0f;
@@ -78,7 +78,7 @@ Class_Matrix_f32<3, 1> Namespace_ALG_Matrix::Axis_Y_3d()
  */
 Class_Matrix_f32<3, 1> Namespace_ALG_Matrix::Axis_Z_3d()
 {
-    Class_Matrix_f32 < 3, 1 > result;
+    Class_Matrix_f32<3, 1> result;
     result[0][0] = 0.0f;
     result[1][0] = 0.0f;
     result[2][0] = 1.0f;
@@ -91,9 +91,9 @@ Class_Matrix_f32<3, 1> Namespace_ALG_Matrix::Axis_Z_3d()
  * @param Angle 旋转角度, 单位弧度
  * @return Class_Matrix_f32<2, 2> 旋转矩阵
  */
-Class_Matrix_f32<2, 2> Namespace_ALG_Matrix::Rotation_2d(const float &Angle)
+Class_Matrix_f32<2, 2> Namespace_ALG_Matrix::From_Angle(const float &Angle)
 {
-    Class_Matrix_f32 < 2, 2 > result;
+    Class_Matrix_f32<2, 2> result;
     float tmp_cos, tmp_sin;
     tmp_cos = arm_cos_f32(Angle);
     tmp_sin = arm_sin_f32(Angle);
@@ -111,9 +111,9 @@ Class_Matrix_f32<2, 2> Namespace_ALG_Matrix::Rotation_2d(const float &Angle)
  * @param Axis 旋转轴, 单位向量
  * @return Class_Matrix_f32<3, 3> 旋转矩阵
  */
-Class_Matrix_f32<3, 3> Namespace_ALG_Matrix::Rotation_3d(const float &Angle, const Class_Matrix_f32<3, 1> &Axis)
+Class_Matrix_f32<3, 3> Namespace_ALG_Matrix::From_Axis_Angle(const float &Angle, const Class_Matrix_f32<3, 1> &Axis)
 {
-    Class_Matrix_f32 < 3, 3 > result;
+    Class_Matrix_f32<3, 3> result;
     float tmp_cos, tmp_sin;
     tmp_cos = arm_cos_f32(Angle);
     tmp_sin = arm_sin_f32(Angle);
@@ -130,6 +130,39 @@ Class_Matrix_f32<3, 3> Namespace_ALG_Matrix::Rotation_3d(const float &Angle, con
 }
 
 /**
+ * @brief 获取三维空间的旋转矩阵
+ *
+ * @param Yaw 偏航角, 单位弧度
+ * @param Pitch 俯仰角, 单位弧度
+ * @param Roll 横滚角, 单位弧度
+ * @return Class_Matrix_f32<3, 3> 旋转矩阵
+ */
+Class_Matrix_f32<3, 3> Namespace_ALG_Matrix::From_Euler_Angle(const float &Yaw, const float &Pitch, const float &Roll)
+{
+    Class_Matrix_f32<3, 3> result;
+    float cy = arm_cos_f32(Yaw);
+    float sy = arm_sin_f32(Yaw);
+    float cp = arm_cos_f32(Pitch);
+    float sp = arm_sin_f32(Pitch);
+    float cr = arm_cos_f32(Roll);
+    float sr = arm_sin_f32(Roll);
+
+    result[0][0] = cy * cp;
+    result[0][1] = cy * sp * sr - sy * cr;
+    result[0][2] = cy * sp * cr + sy * sr;
+
+    result[1][0] = sy * cp;
+    result[1][1] = sy * sp * sr + cy * cr;
+    result[1][2] = sy * sp * cr - cy * sr;
+
+    result[2][0] = -sp;
+    result[2][1] = cp * sr;
+    result[2][2] = cp * cr;
+
+    return (result);
+}
+
+/**
  * @brief 计算两个三维列向量的叉乘
  *
  * @param Vector_1 向量1
@@ -138,7 +171,7 @@ Class_Matrix_f32<3, 3> Namespace_ALG_Matrix::Rotation_3d(const float &Angle, con
  */
 Class_Matrix_f32<3, 1> Namespace_ALG_Matrix::Operator_Cross_3d(const Class_Matrix_f32<3, 1> &Vector_1, const Class_Matrix_f32<3, 1> &Vector_2)
 {
-    Class_Matrix_f32 < 3, 1 > result;
+    Class_Matrix_f32<3, 1> result;
     result[0][0] = Vector_1[1][0] * Vector_2[2][0] - Vector_1[2][0] * Vector_2[1][0];
     result[1][0] = Vector_1[2][0] * Vector_2[0][0] - Vector_1[0][0] * Vector_2[2][0];
     result[2][0] = Vector_1[0][0] * Vector_2[1][0] - Vector_1[1][0] * Vector_2[0][0];

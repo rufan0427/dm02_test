@@ -242,7 +242,45 @@ float Basic_Math_Int_To_Float(int32_t x, int32_t Int_1, int32_t Int_2, float Flo
 bool Basic_Math_Is_Invalid_Float(float x)
 {
     uint32_t exp = (*(uint32_t *) (&x) >> 23) & 0xff;
-    return (exp == 0xff || exp == 0x00);
+    uint32_t frac = (*(uint32_t *) (&x) & 0x7fffff);
+    if (exp == 0x00)
+    {
+        if (frac == 0x00)
+        {
+            // 正负零
+            return (false);
+        }
+        // 次正规数和非正规数
+        return (true);
+    }
+    if (exp == 0xFF)
+    {
+        // 无穷大和NaN
+        return (true);
+    }
+    // 正规数
+    return (false);
+}
+
+/**
+ * @brief 求取模归化
+ *
+ * @param x 传入数据
+ * @param modulus 模数
+ * @return 返回的归化数, 介于 ±modulus / 2 之间
+ */
+float Basic_Math_Modulus_Normalization(float x, float modulus)
+{
+    float tmp;
+
+    tmp = fmod(x + modulus / 2.0f, modulus);
+
+    if (tmp < 0.0f)
+    {
+        tmp += modulus;
+    }
+
+    return (tmp - modulus / 2.0f);
 }
 
 /************************ COPYRIGHT(C) USTC-ROBOWALKER **************************/

@@ -61,15 +61,15 @@ extern struct Struct_OSPI_Manage_Object OSPI2_Manage_Object;
 
 void OSPI_Init(OSPI_HandleTypeDef *hospi, OSPI_Status_Match_Callback Auto_Polling_Callback_Function, OSPI_Rx_Callback Rx_Callback_Function);
 
-void OSPI_Auto_Polling(OSPI_HandleTypeDef *hospi, OSPI_AutoPollingTypeDef *Config);
+void OSPI_Auto_Polling(OSPI_HandleTypeDef * hospi, OSPI_AutoPollingTypeDef * Config);
 
-void OSPI_Command(OSPI_HandleTypeDef *hospi, OSPI_RegularCmdTypeDef *Command);
+void OSPI_Command(OSPI_HandleTypeDef * hospi, OSPI_RegularCmdTypeDef * Command);
 
-void OSPI_Command_Transmit_Data(OSPI_HandleTypeDef *hospi, OSPI_RegularCmdTypeDef *Command);
+void OSPI_Command_Transmit_Data(OSPI_HandleTypeDef * hospi, OSPI_RegularCmdTypeDef * Command);
 
-void OSPI_Command_Receive_Data(OSPI_HandleTypeDef *hospi, OSPI_RegularCmdTypeDef *Command);
+void OSPI_Command_Receive_Data(OSPI_HandleTypeDef * hospi, OSPI_RegularCmdTypeDef * Command);
 
-void OSPI_Command_Transmit_Receive_Data(OSPI_HandleTypeDef *hospi, OSPI_RegularCmdTypeDef *Command);
+void OSPI_Command_Transmit_Receive_Data(OSPI_HandleTypeDef * hospi, OSPI_RegularCmdTypeDef * Command);
 
 #endif
 

@@ -18,7 +18,7 @@
 #include "2_Device/BSP/Power/bsp_power.h"
 #include "1_Middleware/Algorithm/PID/alg_pid.h"
 #include "1_Middleware/Driver/SPI/drv_spi.h"
-#include "tim.h"
+#include "1_Middleware/Algorithm/Matrix/alg_matrix.h"
 #include "stm32h7xx_hal.h"
 
 /* Exported macros -----------------------------------------------------------*/
@@ -51,11 +51,9 @@ public:
 
     inline float Get_Now_Temperature() const;
 
-    inline float Get_Raw_Accel_X() const;
+    inline bool Get_Valid_Flag() const;
 
-    inline float Get_Raw_Accel_Y() const;
-
-    inline float Get_Raw_Accel_Z() const;
+    inline Class_Matrix_f32<3, 1> Get_Raw_Accel() const;
 
     inline float Get_Heater_Enable() const;
 
@@ -122,7 +120,7 @@ protected:
     // 内部变量
 
     // 寄存器结构体
-    Struct_BMI088_Accel_Register Register;
+    Struct_BMI088_Accel_Register Register = {0};
 
     // 加热电阻预热时间戳
     bool Heater_Preheat_Finished_Flag = false;
@@ -132,10 +130,10 @@ protected:
     // 当前温度
     float Now_Temperature = 0.0f;
 
-    // 当前加速度, 单位是一个重力加速度, 即如若z轴向上静置则Raw_Accel_Z=1, 其余为0
-    float Raw_Accel_X = 0.0f;
-    float Raw_Accel_Y = 0.0f;
-    float Raw_Accel_Z = 0.0f;
+    // 当前加速度是否有效
+    bool Valid_Flag = true;
+    // 当前加速度
+    Class_Matrix_f32<3, 1> Vector_Raw_Accel;;
 
     // 写变量
 
@@ -160,6 +158,8 @@ protected:
 
 /* Exported variables --------------------------------------------------------*/
 
+extern const float GRAVITY_ACCELERATION;
+
 extern Class_Power BSP_Power;
 
 /* Exported function declarations --------------------------------------------*/
@@ -175,33 +175,23 @@ inline float Class_BMI088_Accel::Get_Now_Temperature() const
 }
 
 /**
- * @brief 获取当前加速度计X轴原始数据
+ * @brief 获取当前加速度是否有效
  *
- * @return 当前加速度计X轴原始数据
+ * @return 当前加速度是否有效
  */
-inline float Class_BMI088_Accel::Get_Raw_Accel_X() const
+inline bool Class_BMI088_Accel::Get_Valid_Flag() const
 {
-    return (Raw_Accel_X);
+    return (Valid_Flag);
 }
 
 /**
- * @brief 获取当前加速度计Y轴原始数据
+ * @brief 获取当前加速度原始数据
  *
- * @return 当前加速度计Y轴原始数据
+ * @return 当前加速度原始数据
  */
-inline float Class_BMI088_Accel::Get_Raw_Accel_Y() const
+inline Class_Matrix_f32<3, 1> Class_BMI088_Accel::Get_Raw_Accel() const
 {
-    return (Raw_Accel_Y);
-}
-
-/**
- * @brief 获取当前加速度计Z轴原始数据
- *
- * @return 当前加速度计Z轴原始数据
- */
-inline float Class_BMI088_Accel::Get_Raw_Accel_Z() const
-{
-    return (Raw_Accel_Z);
+    return (Vector_Raw_Accel);
 }
 
 /**

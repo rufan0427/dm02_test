@@ -19,6 +19,9 @@
 
 /* Private variables ---------------------------------------------------------*/
 
+// 合肥当地重力加速度
+const float GRAVITY_ACCELERATION = 9.7947f;
+
 /* Private function declarations ---------------------------------------------*/
 
 /* Function prototypes -------------------------------------------------------*/
@@ -111,9 +114,19 @@ void Class_BMI088_Accel::SPI_RxCpltCallback()
     if (spi_init_address == offsetof(Struct_BMI088_Accel_Register, ACC_X_RO))
     {
         // 读取加速度计数据完成
-        Raw_Accel_X = (float) (Register.ACC_X_RO) / 32768.0f * (1 << (BMI088_ACCEL_RANGE + 1)) * 1.5f;
-        Raw_Accel_Y = (float) (Register.ACC_Y_RO) / 32768.0f * (1 << (BMI088_ACCEL_RANGE + 1)) * 1.5f;
-        Raw_Accel_Z = (float) (Register.ACC_Z_RO) / 32768.0f * (1 << (BMI088_ACCEL_RANGE + 1)) * 1.5f;
+
+        Vector_Raw_Accel[0][0] = (float) (Register.ACC_X_RO) / 32768.0f * (1 << (BMI088_ACCEL_RANGE + 1)) * 1.5f * GRAVITY_ACCELERATION;
+        Vector_Raw_Accel[1][0] = (float) (Register.ACC_Y_RO) / 32768.0f * (1 << (BMI088_ACCEL_RANGE + 1)) * 1.5f * GRAVITY_ACCELERATION;
+        Vector_Raw_Accel[2][0] = (float) (Register.ACC_Z_RO) / 32768.0f * (1 << (BMI088_ACCEL_RANGE + 1)) * 1.5f * GRAVITY_ACCELERATION;
+
+        if (Basic_Math_Is_Invalid_Float(Vector_Raw_Accel[0][0]) || Basic_Math_Is_Invalid_Float(Vector_Raw_Accel[1][0]) || Basic_Math_Is_Invalid_Float(Vector_Raw_Accel[2][0]))
+        {
+            Valid_Flag = false;
+        }
+        else
+        {
+            Valid_Flag = true;
+        }
     }
     else if (spi_init_address == offsetof(Struct_BMI088_Accel_Register, TEMP_MSB_RO))
     {
@@ -188,7 +201,7 @@ void Class_BMI088_Accel::TIM_128ms_Heater_PID_PeriodElapsedCallback()
         }
         float output = tmp / (BSP_Power.Get_Power_Voltage() * BSP_Power.Get_Power_Voltage()) * HEATER_NOMINAL_VOLTAGE * HEATER_NOMINAL_VOLTAGE;
         Basic_Math_Constrain(&output, 0.0f, 10000.0f);
-        __HAL_TIM_SET_COMPARE(htim, TIM_Channel, (uint32_t) (output));
+        __HAL_TIM_SET_COMPARE(htim, TIM_Channel, (uint32_t)(output));
     }
     else
     {

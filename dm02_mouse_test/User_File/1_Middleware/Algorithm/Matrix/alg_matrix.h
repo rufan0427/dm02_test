@@ -378,9 +378,11 @@ namespace Namespace_ALG_Matrix
 
     Class_Matrix_f32<3, 1> Axis_Z_3d();
 
-    Class_Matrix_f32<2, 2> Rotation_2d(const float &Angle);
+    Class_Matrix_f32<2, 2> From_Angle(const float &Angle);
 
-    Class_Matrix_f32<3, 3> Rotation_3d(const float &Angle, const Class_Matrix_f32<3, 1> &Axis);
+    Class_Matrix_f32<3, 3> From_Axis_Angle(const float &Angle, const Class_Matrix_f32<3, 1> &Axis);
+
+    Class_Matrix_f32<3, 3> From_Euler_Angle(const float &Yaw, const float &Pitch, const float &Roll);
 
     template<int row, int column>
     Class_Matrix_f32<row, column> Zero();
@@ -421,7 +423,7 @@ inline Class_Matrix_f32<column, row> Class_Matrix_f32<row, column>::Get_Transpos
         }
     }
 
-    return (Class_Matrix_f32<column, row>(result[0]));
+    return (result);
 }
 
 /**
@@ -702,8 +704,6 @@ Class_Matrix_f32<row, column> Namespace_ALG_Matrix::Identity()
  *
  * @tparam row 行数
  * @tparam column 列数
- * @tparam const_row 常量矩阵行数
- * @tparam const_column 常量矩阵列数
  * @return Class_Matrix_f32<row, column> 常量矩阵
  */
 template<int row, int column>
