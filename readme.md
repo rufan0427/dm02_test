@@ -38,8 +38,8 @@
   - OpenOCD
     - 版本: 20231002-0.12.0
     - https://sourceforge.net/projects/openocd/files/
-    - DAPLink配置文件位置: [daplink.cfg](.\dm02_test\User_Config\daplink.cfg)
-    - STLink配置文件位置: [stlink.cfg](.\dm02_test\User_Config\stlink.cfg)
+    - DAPLink配置文件位置: [daplink.cfg](./dm02_test/User_Config/daplink.cfg)
+    - STLink配置文件位置: [stlink.cfg](./dm02_test/User_Config/stlink.cfg)
 - 绘图调试工具
   - 当前示例程序默认的绘图调试工具为Vofa+, 由USB虚拟串口引出. 后续可按需修改为Serialplot, 亦可按需修改为UART串口
   - Vofa+
