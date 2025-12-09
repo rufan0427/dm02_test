@@ -49,4 +49,6 @@
 
 ## 3 达妙板相关文档
 
-请查阅目录: [ref](./ref)
+达妙板官方仓库: https://gitee.com/kit-miao/dm-mc02
+
+亦可查阅我整理的目录: [ref](./ref)
