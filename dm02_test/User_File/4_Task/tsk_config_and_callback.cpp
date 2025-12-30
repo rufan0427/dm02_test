@@ -316,7 +316,7 @@ void Task1ms_Callback()
 
     // 串口绘图
     // IMU常规显示
-    Vofa_USB.Set_Data(23, &yaw, &pitch, &roll, &q0, &q1, &q2, &q3, &temperature, &calculating_time, &loss, &origin_accel_x, &origin_accel_y, &origin_accel_z, &origin_gyro_x, &origin_gyro_y, &origin_gyro_z, &now_time, &accel_x, &accel_y, &accel_z, &gyro_x, &gyro_y, &gyro_z);
+    Vofa_USB.Set_Data(23, &origin_accel_x, &origin_accel_y, &origin_accel_z, &origin_gyro_x, &origin_gyro_y, &origin_gyro_z, &q0, &q1, &q2, &q3, &yaw, &pitch, &roll, &temperature, &accel_x, &accel_y, &accel_z, &gyro_x, &gyro_y, &gyro_z, &loss, &calculating_time, &now_time);
     // Vofa_USB.Set_Data(7, &motor_target_angle, &motor_now_angle, &motor_target_omega, &motor_now_omega, &motor_target_torque, &motor_now_torque, &filter_omega);
     Vofa_USB.TIM_1ms_Write_PeriodElapsedCallback();
 
