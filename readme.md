@@ -8,7 +8,17 @@
 
 教学视频合集: https://space.bilibili.com/337732684/lists/1043942
 
-此外, 还有一个基于BMI088陀螺仪的小项目, 位于[dm02_mouse_test](./dm02_mouse_test), 烧录该程序, 利用USB-Type-C数据线将开发板接入电脑后可实现陀螺仪感应鼠标的功能
+由于达妙板温控直接接入了24V, 为保证安全, 此代码默认关闭IMU的温控. 当初次烧写代码并确认IMU工作正常, 即Vofa+的位姿信息正常时, 可使能IMU的加热电阻. 使能加热电阻的方式如下
+
+> 打开如下图所示的文件[bsp_bmi088.cpp](./dm02_test/User_File/2_Device/BSP/BMI088/bsp_bmi088.cpp)
+>
+> <img src="readme.assets/image-20260103104136964.png" alt="image-20260103104136964"  />
+>
+> 将代码 " BMI088_Accel.Init(false); " 的 " false " 修改为 " true " 即可
+>
+> <img src="readme.assets/image-20260103104633964.png" alt="image-20260103104633964" style="zoom:50%;" />
+
+此外, 本项目还有一个基于BMI088陀螺仪的小项目, 位于[dm02_mouse_test](./dm02_mouse_test), 烧录该程序, 利用USB-Type-C数据线将开发板接入电脑后可实现陀螺仪感应鼠标的功能
 
 ## 2 开发环境
 
