@@ -16,7 +16,7 @@
 
 #include "2_Device/Motor/Motor_DJI/dvc_motor_dji.h"
 #include "2_Device/BSP/BMI088/bsp_bmi088.h"
-#include "2_Device/Vofa/dvc_vofa.h"
+#include "2_Device/Plotter/Vofa/dvc_vofa.h"
 #include "2_Device/BSP/W25Q64JV/bsp_w25q64jv.h"
 #include "2_Device/BSP/WS2812/bsp_ws2812.h"
 #include "2_Device/BSP/Buzzer/bsp_buzzer.h"
