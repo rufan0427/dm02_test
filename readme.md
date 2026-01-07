@@ -2,23 +2,24 @@
 
 ## 1 项目概述
 
-本项目工作路径为[dm02_test](./dm02_test), 支持RM常见的数学库, 通信驱动库, 板载模块库, RM电机与达妙电机库等, 并实现了测试例程, 位于[tsk_config_and_callback.cpp](./dm02_test/User_File/4_Task/tsk_config_and_callback.cpp)中
+1. 本项目工作路径为[dm02_test](./dm02_test), 支持RM常见的数学库, 通信驱动库, 板载模块库, RM电机与达妙电机库等, 并实现了测试例程, 位于[tsk_config_and_callback.cpp](./dm02_test/User_File/4_Task/tsk_config_and_callback.cpp)中
 
-项目演示教学视频: (后续更新)
+   项目演示教学视频: (后续更新)
 
-教学视频合集: https://space.bilibili.com/337732684/lists/1043942
+   教学视频合集: https://space.bilibili.com/337732684/lists/1043942
 
-由于达妙板温控直接接入了24V, 为保证安全, 此代码默认关闭IMU的温控. 当初次烧写代码并确认IMU工作正常, 即Vofa+的位姿信息正常时, 可使能IMU的加热电阻. 使能加热电阻的方式如下
+   由于达妙板温控直接接入了24V, 为保证安全, 此代码默认关闭IMU的温控. 当初次烧写代码并确认IMU工作正常, 即Vofa+的位姿信息正常时, 可使能IMU的加热电阻. 使能加热电阻的方式如下
 
-> 打开如下图所示的文件[bsp_bmi088.cpp](./dm02_test/User_File/2_Device/BSP/BMI088/bsp_bmi088.cpp)
->
-> <img src="readme.assets/image-20260103104136964.png" alt="image-20260103104136964"  />
->
-> 将代码 " BMI088_Accel.Init(false); " 的 " false " 修改为 " true " 即可
->
-> <img src="readme.assets/image-20260103104633964.png" alt="image-20260103104633964" style="zoom:50%;" />
+   > 打开如下图所示的文件[bsp_bmi088.cpp](./dm02_test/User_File/2_Device/BSP/BMI088/bsp_bmi088.cpp)
+   >
+   > <img src="readme.assets/image-20260103104136964.png" alt="image-20260103104136964"  />
+   >
+   > 将代码 " BMI088_Accel.Init(false); " 的 " false " 修改为 " true " 即可
+   >
+   > <img src="readme.assets/image-20260103104633964.png" alt="image-20260103104633964" style="zoom:50%;" />
 
-此外, 本项目还有一个基于BMI088陀螺仪的小项目, 位于[dm02_mouse_test](./dm02_mouse_test), 烧录该程序, 利用USB-Type-C数据线将开发板接入电脑后可实现陀螺仪感应鼠标的功能
+2. 为便于各位开发者直接上手工程自行编写代码, 本项目还有一个空工程用于参考, 位于[dm02_test_pure](./dm02_test_pure)
+3. 此外, 本项目还有一个基于BMI088陀螺仪的小项目, 位于[dm02_mouse_test](./dm02_mouse_test), 烧录该程序, 利用USB-Type-C数据线将开发板接入电脑后可实现陀螺仪感应鼠标的功能
 
 ## 2 开发环境
 
