@@ -14,7 +14,6 @@
 
 #include "tsk_config_and_callback.h"
 
-#include "2_Device/Motor/Motor_DJI/dvc_motor_dji.h"
 #include "2_Device/BSP/BMI088/bsp_bmi088.h"
 #include "2_Device/BSP/W25Q64JV/bsp_w25q64jv.h"
 #include "2_Device/BSP/WS2812/bsp_ws2812.h"
@@ -105,7 +104,7 @@ void Task1ms_Callback()
     {
         mod10 = 0;
 
-        if (red == 255)
+        if (red == 10)
         {
             red_minus_flag = true;
         }
@@ -113,7 +112,7 @@ void Task1ms_Callback()
         {
             red_minus_flag = false;
         }
-        if (green == 255)
+        if (green == 10)
         {
             green_minus_flag = true;
         }
@@ -121,7 +120,7 @@ void Task1ms_Callback()
         {
             green_minus_flag = false;
         }
-        if (blue == 255)
+        if (blue == 10)
         {
             blue_minus_flag = true;
         }
@@ -155,8 +154,8 @@ void Task1ms_Callback()
             blue++;
         }
 
-        // BSP_WS2812.Set_RGB(red, green, blue);
-        BSP_WS2812.Set_RGB(0, 0, 0);
+        BSP_WS2812.Set_RGB(red, green, blue);
+        // BSP_WS2812.Set_RGB(0, 0, 0);
 
         // 发送实例
         BSP_WS2812.TIM_10ms_Write_PeriodElapsedCallback();
@@ -206,26 +205,6 @@ void Task1ms_Callback()
     mouse_data.button_right = 0;
     mouse_data.button_middle = 0;
     mouse_data.reserved = 0;
-    // if (BSP_Key.Get_Key_Status() == BSP_Key_Status_PRESSED)
-    // {
-    //     mouse_data.x = 0;
-    // }
-    // else
-    // {
-    //     int tmp = -BSP_BMI088.BMI088_Gyro.Get_Raw_Gyro_X() * 30.0f;
-    //     Basic_Math_Constrain(&tmp, -32767, 32767);
-    //     mouse_data.x = (int16_t) tmp;
-    // }
-    // if (BSP_Key.Get_Key_Status() == BSP_Key_Status_PRESSED)
-    // {
-    //     mouse_data.y = 0;
-    // }
-    // else
-    // {
-    //     int tmp = BSP_BMI088.BMI088_Gyro.Get_Raw_Gyro_Y() * 30.0f;
-    //     Basic_Math_Constrain(&tmp, -32767, 32767);
-    //     mouse_data.y = (int16_t) tmp;
-    // }
     int tmp;
     tmp = -BSP_BMI088.BMI088_Gyro.Get_Raw_Gyro()[0][0] * 15.0f;
     Basic_Math_Constrain(&tmp, -32767, 32767);
@@ -237,7 +216,6 @@ void Task1ms_Callback()
     extern USBD_HandleTypeDef hUsbDeviceHS;
     USBD_HID_SendReport(&hUsbDeviceHS, (uint8_t *)&mouse_data, sizeof(mouse_data));
 
-    TIM_1ms_CAN_PeriodElapsedCallback();
     // 喂狗
     TIM_1ms_IWDG_PeriodElapsedCallback();
 }

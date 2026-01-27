@@ -34,6 +34,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 // 串口绘图
+Class_Vofa_USB Vofa_USB;
 char Vofa_Variable_Assignment_List[][VOFA_RX_VARIABLE_ASSIGNMENT_MAX_LENGTH] = {"q00", "q11", "r00", "r11",};
 
 // LED灯
