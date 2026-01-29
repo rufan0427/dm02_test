@@ -38,9 +38,9 @@ Class_Vofa_USB Vofa_USB;
 char Vofa_Variable_Assignment_List[][VOFA_RX_VARIABLE_ASSIGNMENT_MAX_LENGTH] = {"q00", "q11", "r00", "r11",};
 
 // LED灯
-uint8_t red = 0;
-uint8_t green = 170;
-uint8_t blue = 170;
+int32_t red = 0;
+int32_t green = 12;
+int32_t blue = 12;
 bool red_minus_flag = false;
 bool green_minus_flag = false;
 bool blue_minus_flag = true;
@@ -180,7 +180,7 @@ void Task1ms_Callback()
     {
         mod10 = 0;
 
-        if (red == 10)
+        if (red >= 18)
         {
             red_minus_flag = true;
         }
@@ -188,7 +188,7 @@ void Task1ms_Callback()
         {
             red_minus_flag = false;
         }
-        if (green == 10)
+        if (green >= 18)
         {
             green_minus_flag = true;
         }
@@ -196,7 +196,7 @@ void Task1ms_Callback()
         {
             green_minus_flag = false;
         }
-        if (blue == 10)
+        if (blue >= 18)
         {
             blue_minus_flag = true;
         }
@@ -314,6 +314,9 @@ void Task1ms_Callback()
     float motor_target_torque = motor.Get_Target_Torque();
     float motor_now_torque = motor.Get_Now_Torque();
     float filter_omega = filter_kalman.Vector_X[1][0];
+    float float_red = static_cast<float>(red);
+    float float_green = static_cast<float>(green);
+    float float_blue = static_cast<float>(blue);
 
     // 串口绘图
     // IMU常规显示
