@@ -65,8 +65,9 @@ void Class_W25Q64JV::Init(const Enum_W25Q64JV_Mode &__Flash_Mode)
  */
 void Class_W25Q64JV::OSPI_StatusMatchCallback()
 {
-    // 轮询结束
+    // 轮询结束, 重置标志位
     Busy_Flag = false;
+    Write_Enable_Activated_Flag = false;
 
     if (Current_Instruction == W25Q64JV_Command_WRITE_ENABLE)
     {
