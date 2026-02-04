@@ -146,9 +146,17 @@ void OSPI2_Polling_Callback()
  * @brief OSPI2接收回调函数
  *
  */
-void OSPI2_Rx_Callback(uint8_t *Buffer, uint16_t Length)
+void OSPI2_Rx_Callback(uint8_t *Buffer)
 {
     BSP_W25Q64JV.OSPI_RxCallback();
+}
+
+/**
+ *@brief OSPI2发送回调函数
+ */
+void OSPI2_Tx_Callback(uint8_t *Buffer)
+{
+    BSP_W25Q64JV.OSPI_TxCallback();
 }
 
 /**
@@ -365,7 +373,7 @@ void Task_Init()
     // 电源的ADC
     ADC_Init(&hadc1, 1);
     // flash的OSPI
-    OSPI_Init(&hospi2, nullptr, nullptr);
+    OSPI_Init(&hospi2, OSPI2_Polling_Callback, OSPI2_Rx_Callback, OSPI2_Tx_Callback);
 
     // 定时器中断初始化
     HAL_TIM_Base_Start_IT(&htim4);

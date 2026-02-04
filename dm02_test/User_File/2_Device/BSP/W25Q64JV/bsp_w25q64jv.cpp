@@ -86,6 +86,17 @@ void Class_W25Q64JV::OSPI_StatusMatchCallback()
 void Class_W25Q64JV::OSPI_RxCallback()
 {
     // 后续可按需写特化的处理
+    Auto_Polling_With_Timeout();
+}
+
+/**
+ * @brief OSPI接收完成回调函数
+ *
+ */
+void Class_W25Q64JV::OSPI_TxCallback()
+{
+    // 后续可按需写特化的处理
+    Auto_Polling_With_Timeout();
 }
 
 /**
@@ -107,11 +118,6 @@ void Class_W25Q64JV::TIM_1ms_AutoPollingTimeout_PeriodElapsedCallback()
  */
 void Class_W25Q64JV::Auto_Polling_With_Timeout()
 {
-    if (Busy_Flag)
-    {
-        return;
-    }
-    Busy_Flag = true;
     Busy_Timestamp = SYS_Timestamp.Get_Current_Timestamp();
 
     Command = COMMAND_DEFAULT_CONFIG;

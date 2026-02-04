@@ -31,9 +31,9 @@
 /* Private variables ---------------------------------------------------------*/
 
 // LED灯
-uint8_t red = 0;
-uint8_t green = 170;
-uint8_t blue = 170;
+int32_t red = 0;
+int32_t green = 12;
+int32_t blue = 12;
 bool red_minus_flag = false;
 bool green_minus_flag = false;
 bool blue_minus_flag = true;
@@ -70,9 +70,17 @@ void OSPI2_Polling_Callback()
  * @brief OSPI2接收回调函数
  *
  */
-void OSPI2_Rx_Callback(uint8_t *Buffer, uint16_t Length)
+void OSPI2_Rx_Callback(uint8_t *Buffer)
 {
     BSP_W25Q64JV.OSPI_RxCallback();
+}
+
+/**
+ *@brief OSPI2发送回调函数
+ */
+void OSPI2_Tx_Callback(uint8_t *Buffer)
+{
+    BSP_W25Q64JV.OSPI_TxCallback();
 }
 
 /**
@@ -104,7 +112,7 @@ void Task1ms_Callback()
     {
         mod10 = 0;
 
-        if (red == 10)
+        if (red >= 18)
         {
             red_minus_flag = true;
         }
@@ -112,7 +120,7 @@ void Task1ms_Callback()
         {
             red_minus_flag = false;
         }
-        if (green == 10)
+        if (green >= 18)
         {
             green_minus_flag = true;
         }
@@ -120,7 +128,7 @@ void Task1ms_Callback()
         {
             green_minus_flag = false;
         }
-        if (blue == 10)
+        if (blue >= 18)
         {
             blue_minus_flag = true;
         }
@@ -252,7 +260,7 @@ void Task_Init()
     // 电源的ADC
     ADC_Init(&hadc1, 1);
     // flash的OSPI
-    OSPI_Init(&hospi2, nullptr, nullptr);
+    OSPI_Init(&hospi2, OSPI2_Polling_Callback, OSPI2_Rx_Callback, OSPI2_Tx_Callback);
 
     // 定时器中断初始化
     HAL_TIM_Base_Start_IT(&htim4);
