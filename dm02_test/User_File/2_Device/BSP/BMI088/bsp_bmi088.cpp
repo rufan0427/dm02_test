@@ -19,6 +19,10 @@
 
 /* Private variables ---------------------------------------------------------*/
 
+Class_Matrix_f32<4, 1> Class_BMI088::Quaternion_Tmp;
+float Class_BMI088::Modulus_Tmp;
+Class_Matrix_f32<4, 4> Class_BMI088::Orthogonalization_Tmp;
+
 Class_BMI088 BSP_BMI088;
 
 /* Private function declarations ---------------------------------------------*/
@@ -147,6 +151,11 @@ void Class_BMI088::TIM_125us_Calculate_PeriodElapsedCallback()
 
         Vector_Normalized_Accel = Vector_Original_Accel.Get_Normalization();
     }
+    else
+    {
+        shadow_accel_status.Update_Flag = false;
+        Accel_Status.Update_Flag = false;
+    }
 
     if (!EKF_Init_Finished_Flag && shadow_accel_status.Update_Flag && BMI088_Accel.Get_Valid_Flag())
     {
@@ -159,7 +168,7 @@ void Class_BMI088::TIM_125us_Calculate_PeriodElapsedCallback()
         Class_Matrix_f32<4, 4> matrix_p = Namespace_ALG_Matrix::Identity<4, 4>();
         // 初始状态向量
         Class_Matrix_f32<4, 1> vector_x;
-        float init_euler[3] = {0.0f, atan2f(Vector_Normalized_Accel[1][0], Vector_Normalized_Accel[2][0]), asinf(-Vector_Normalized_Accel[0][0])};
+        float init_euler[3] = {Vector_Euler_Angle[0][0], atan2f(Vector_Normalized_Accel[1][0], Vector_Normalized_Accel[2][0]), asinf(-Vector_Normalized_Accel[0][0])};
         vector_x = Namespace_ALG_Quaternion::From_Euler_Angle(Class_Matrix_f32<3, 1>(init_euler)).Get_Normalization();
 
         // 初始化EKF算法本体
@@ -309,9 +318,6 @@ void Class_BMI088::TIM_125us_Calculate_PeriodElapsedCallback()
                 EKF_Pre_Valid_Timestamp = Gyro_Status.Ready_Timestamp;
             }
         }
-        // x归一化, 按理来说这也算模型的一部分, 应当放到系统函数F中, 且需要更新Jacobi矩阵
-        // 然而实测发现是否更新对性能影响不算太大, 更新反而占用了计算时间
-        EKF_Quaternion.Vector_X = EKF_Quaternion.Vector_X.Get_Normalization();
 
         // 数据输出
 
@@ -326,16 +332,15 @@ void Class_BMI088::TIM_125us_Calculate_PeriodElapsedCallback()
         Class_Matrix_f32<3, 1> vector_gravity_body = Matrix_Rotation.Get_Transpose() * (-Namespace_ALG_Matrix::Axis_Z_3d() * GRAVITY_ACCELERATION);
         // 输出运动学相关变量
         Vector_Accel_Body = Vector_Original_Accel + vector_gravity_body;
-        Vector_Accel = Matrix_Rotation * Vector_Accel_Body;
+        Vector_Accel_Odom = Matrix_Rotation * Vector_Accel_Body;
         Vector_Gyro_Body = Vector_Original_Gyro;
-        Vector_Gyro = Matrix_Rotation * Vector_Gyro_Body;
+        Vector_Gyro_Odom = Matrix_Rotation * Vector_Gyro_Body;
 
         Calculating_Time = SYS_Timestamp.Get_Now_Microsecond() - now_timestamp;
 
         if (BMI088_Gyro.Get_Valid_Flag())
         {
             Vector_Pre_Valid_Gyro = Vector_Original_Gyro;
-            Gyro_Pre_Status = shadow_gyro_status;
         }
     }
 }
@@ -436,7 +441,11 @@ Class_Matrix_f32<4, 1> Class_BMI088::EKF_Function_F(const Class_Matrix_f32<4, 1>
     matrix_omega[3][2] = -Vector_U[0][0];
     matrix_omega[3][3] = 0.0f;
 
-    matrix_result = Vector_X + 0.5f * D_T * matrix_omega * Vector_X;
+    Quaternion_Tmp = Vector_X + 0.5f * D_T * matrix_omega * Vector_X;
+    Modulus_Tmp = 1.0f / Quaternion_Tmp.Get_Modulus<4, 1>();
+    Orthogonalization_Tmp = Modulus_Tmp * (Namespace_ALG_Matrix::Identity<4, 4>() - Modulus_Tmp * Modulus_Tmp * Quaternion_Tmp * Quaternion_Tmp.Get_Transpose());
+
+    matrix_result = Quaternion_Tmp.Get_Normalization<4, 1>();
 
     return matrix_result;
 }
@@ -469,7 +478,7 @@ Class_Matrix_f32<4, 4> Class_BMI088::EKF_Function_Jacobian_F_X(const Class_Matri
     matrix_omega[3][1] = Vector_U[1][0];
     matrix_omega[3][2] = -Vector_U[0][0];
 
-    matrix_result = Namespace_ALG_Matrix::Identity<4, 4>() + 0.5f * D_T * matrix_omega;
+    matrix_result = Orthogonalization_Tmp * (Namespace_ALG_Matrix::Identity<4, 4>() + 0.5f * D_T * matrix_omega);
 
     return matrix_result;
 }
@@ -479,6 +488,7 @@ Class_Matrix_f32<4, 4> Class_BMI088::EKF_Function_Jacobian_F_X(const Class_Matri
  *
  * @param Vector_X 状态向量
  * @param Vector_U 输入向量
+ * @param D_T 时间间隔
  */
 Class_Matrix_f32<4, 3> Class_BMI088::EKF_Function_Jacobian_F_W(const Class_Matrix_f32<4, 1> &Vector_X, const Class_Matrix_f32<3, 1> &Vector_U, const float &D_T)
 {
@@ -499,7 +509,7 @@ Class_Matrix_f32<4, 3> Class_BMI088::EKF_Function_Jacobian_F_W(const Class_Matri
     matrix_q[3][1] = Vector_X[1][0];
     matrix_q[3][2] = Vector_X[0][0];
 
-    matrix_result = 0.5f * D_T * matrix_q;
+    matrix_result = Orthogonalization_Tmp * (0.5f * D_T * matrix_q);
 
     return matrix_result;
 }
@@ -508,6 +518,7 @@ Class_Matrix_f32<4, 3> Class_BMI088::EKF_Function_Jacobian_F_W(const Class_Matri
  * @brief 四元数测量函数
  *
  * @param Vector_X 状态向量
+ * @param D_T 时间间隔
  */
 Class_Matrix_f32<3, 1> Class_BMI088::EKF_Function_H(const Class_Matrix_f32<4, 1> &Vector_X, const float &D_T)
 {
@@ -524,6 +535,7 @@ Class_Matrix_f32<3, 1> Class_BMI088::EKF_Function_H(const Class_Matrix_f32<4, 1>
  * @brief 四元数测量函数对状态的雅可比矩阵
  *
  * @param Vector_X 状态向量
+ * @param D_T 时间间隔
  */
 Class_Matrix_f32<3, 4> Class_BMI088::EKF_Function_Jacobian_H_X(const Class_Matrix_f32<4, 1> &Vector_X, const float &D_T)
 {
@@ -551,6 +563,7 @@ Class_Matrix_f32<3, 4> Class_BMI088::EKF_Function_Jacobian_H_X(const Class_Matri
  * @brief 四元数测量函数对测量噪声的雅可比矩阵
  *
  * @param Vector_X 状态向量
+ * @param D_T 时间间隔
  */
 Class_Matrix_f32<3, 3> Class_BMI088::EKF_Function_Jacobian_H_V(const Class_Matrix_f32<4, 1> &Vector_X, const float &D_T)
 {
