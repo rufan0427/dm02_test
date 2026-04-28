@@ -283,11 +283,6 @@ void Task1ms_Callback()
     filter_kalman.TIM_Predict_PeriodElapsedCallback();
     filter_kalman.TIM_Update_PeriodElapsedCallback();
 
-    float queue_accel_len = BSP_BMI088.Queue_Accel.Get_Length();
-    float queue_gyro_len = BSP_BMI088.Queue_Gyro.Get_Length();
-
-    BSP_BMI088.TIM_Calculate_PeriodElapsedCallback();
-
     float yaw = BSP_BMI088.Get_Euler_Angle()[0][0] / BASIC_MATH_DEG_TO_RAD;
     float pitch = BSP_BMI088.Get_Euler_Angle()[1][0] / BASIC_MATH_DEG_TO_RAD;
     float roll = BSP_BMI088.Get_Euler_Angle()[2][0] / BASIC_MATH_DEG_TO_RAD;
@@ -348,7 +343,7 @@ void Task1ms_Callback()
  */
 void Task125us_Callback()
 {
-
+    BSP_BMI088.TIM_125us_Calculate_PeriodElapsedCallback();
 }
 
 /**
@@ -357,7 +352,7 @@ void Task125us_Callback()
  */
 void Task10us_Callback()
 {
-    BSP_BMI088.TIM_10us_Transmission_Scheduling_PeriodElapsedCallback();
+    BSP_BMI088.TIM_10us_Calculate_PeriodElapsedCallback();
 }
 
 /**
