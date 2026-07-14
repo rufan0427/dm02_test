@@ -37,7 +37,7 @@ void Class_BMI088::Init()
 {
     SPI_Manage_Object = &SPI2_Manage_Object;
 
-    BMI088_Accel.Init(false);
+    BMI088_Accel.Init(true);
     BMI088_Gyro.Init();
 
     // 欧拉角需要辅助初始化EKF, 第一次初始化默认Yaw是0
@@ -334,7 +334,7 @@ void Class_BMI088::TIM_125us_Calculate_PeriodElapsedCallback()
         Class_Matrix_f32<3, 1> vector_gravity_body = Matrix_Rotation.Get_Transpose() * (-Namespace_ALG_Matrix::Axis_Z_3d() * GRAVITY_ACCELERATION);
         // 输出运动学相关变量
         Vector_Accel_Body = Vector_Original_Accel + vector_gravity_body;
-        Vector_Accel_Odom = Matrix_Rotation * Vector_Accel_Body;
+        Vector_Accel_Odom = Matrix_Rotation * Vector_Accel_Body+ACCEL_BIAS_MANUAL;
         Velocity_Calculate(now_timestamp);
         Vector_Gyro_Body = Vector_Original_Gyro;
         Vector_Gyro_Odom = Matrix_Rotation * Vector_Gyro_Body;

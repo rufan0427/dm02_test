@@ -303,6 +303,9 @@ void Task1ms_Callback()
     float accel_x = BSP_BMI088.Get_Accel_Odom()[0][0];
     float accel_y = BSP_BMI088.Get_Accel_Odom()[1][0];
     float accel_z = BSP_BMI088.Get_Accel_Odom()[2][0];
+    float velocity_x = BSP_BMI088.Get_Velocity_Odom()[0][0];
+    float velocity_y = BSP_BMI088.Get_Velocity_Odom()[1][0];
+    float velocity_z = BSP_BMI088.Get_Velocity_Odom()[2][0];
     float gyro_x = BSP_BMI088.Get_Gyro_Odom()[0][0];
     float gyro_y = BSP_BMI088.Get_Gyro_Odom()[1][0];
     float gyro_z = BSP_BMI088.Get_Gyro_Odom()[2][0];
@@ -328,8 +331,9 @@ void Task1ms_Callback()
 
     // 串口绘图
     // IMU常规显示
-    Vofa_USB.Set_Data(23, &origin_accel_x, &origin_accel_y, &origin_accel_z, &origin_gyro_x, &origin_gyro_y, &origin_gyro_z, &q0, &q1, &q2, &q3, &yaw, &pitch, &roll, &temperature, &accel_x, &accel_y, &accel_z, &gyro_x, &gyro_y, &gyro_z, &loss, &calculating_time, &now_time);
+    // Vofa_USB.Set_Data(23, &origin_accel_x, &origin_accel_y, &origin_accel_z, &origin_gyro_x, &origin_gyro_y, &origin_gyro_z, &q0, &q1, &q2, &q3, &yaw, &pitch, &roll, &temperature, &accel_x, &accel_y, &accel_z, &gyro_x, &gyro_y, &gyro_z, &loss, &calculating_time, &now_time);
     // Vofa_USB.Set_Data(7, &motor_target_angle, &motor_now_angle, &motor_target_omega, &motor_now_omega, &motor_target_torque, &motor_now_torque, &filter_omega);
+    Vofa_USB.Set_Data(7,&accel_x,&accel_y,&accel_z,&velocity_x,&velocity_y,&velocity_z,&now_time);
     Vofa_USB.TIM_1ms_Write_PeriodElapsedCallback();
 
     TIM_1ms_CAN_PeriodElapsedCallback();
