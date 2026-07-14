@@ -72,6 +72,8 @@ public:
 
     inline Class_Matrix_f32<3, 1> Get_Accel_Odom();
 
+    inline Class_Matrix_f32<3, 1> Get_Velocity_Odom();
+
     inline Class_Matrix_f32<3, 1> Get_Gyro_Odom();
 
     inline float Get_Accel_Chi_Square_Loss() const;
@@ -140,6 +142,8 @@ protected:
 
     // 上次有效历史数据时间戳
     uint64_t EKF_Pre_Valid_Timestamp = 0;
+    // 上次速度积分时间戳
+    uint64_t Velocity_Pre_Valid_Timestamp = 0;
 
     // 时间差
     float Valid_D_T = 0.000125f;
@@ -174,6 +178,8 @@ protected:
     Class_Matrix_f32<3, 1> Vector_Gyro_Body;
     // 大地坐标系下的加速度
     Class_Matrix_f32<3, 1> Vector_Accel_Odom;
+    // 大地坐标系下的速度
+    Class_Matrix_f32<3, 1> Vector_Velocity_Odom;
     // 大地坐标系下的角速度
     Class_Matrix_f32<3, 1> Vector_Gyro_Odom;
 
@@ -207,7 +213,12 @@ protected:
     // 四元数测量函数对测量噪声的雅可比矩阵
     static Class_Matrix_f32<3, 3> EKF_Function_Jacobian_H_V(const Class_Matrix_f32<4, 1> &Vector_X, const float &D_T);
 
+    // 速度状态转移函数
+    static Class_Matrix_f32<3, 1> Velocity_Function_F(const Class_Matrix_f32<3, 1> &Vector_X, const Class_Matrix_f32<3, 1> &Vector_U, const float &D_T);
+
     void Accel_Chi_Square_Calculate();
+
+    void Velocity_Calculate(const uint64_t &Now_Timestamp);
 };
 
 /* Exported variables --------------------------------------------------------*/
@@ -300,6 +311,15 @@ inline Class_Matrix_f32<3, 1> Class_BMI088::Get_Gyro_Body()
 inline Class_Matrix_f32<3, 1> Class_BMI088::Get_Accel_Odom()
 {
     return (Vector_Accel_Odom);
+}
+
+/**
+ * @brief 获取大地坐标系下的速度
+ *
+ */
+inline Class_Matrix_f32<3, 1> Class_BMI088::Get_Velocity_Odom()
+{
+    return (Vector_Velocity_Odom);
 }
 
 /**

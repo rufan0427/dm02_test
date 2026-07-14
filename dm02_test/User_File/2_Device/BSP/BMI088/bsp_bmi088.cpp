@@ -182,6 +182,8 @@ void Class_BMI088::TIM_125us_Calculate_PeriodElapsedCallback()
         Accel_Status.Update_Flag = false;
         // 设置时间戳
         EKF_Pre_Valid_Timestamp = now_timestamp;
+        Velocity_Pre_Valid_Timestamp = now_timestamp;
+        Vector_Velocity_Odom = Class_Matrix_f32<3, 1>();
     }
     else if (EKF_Init_Finished_Flag)
     {
@@ -333,6 +335,7 @@ void Class_BMI088::TIM_125us_Calculate_PeriodElapsedCallback()
         // 输出运动学相关变量
         Vector_Accel_Body = Vector_Original_Accel + vector_gravity_body;
         Vector_Accel_Odom = Matrix_Rotation * Vector_Accel_Body;
+        Velocity_Calculate(now_timestamp);
         Vector_Gyro_Body = Vector_Original_Gyro;
         Vector_Gyro_Odom = Matrix_Rotation * Vector_Gyro_Body;
 
@@ -571,6 +574,18 @@ Class_Matrix_f32<3, 3> Class_BMI088::EKF_Function_Jacobian_H_V(const Class_Matri
 }
 
 /**
+ * @brief 速度状态转移函数
+ *
+ * @param Vector_X 速度状态向量, 单位m/s
+ * @param Vector_U 加速度输入向量, 单位m/s²
+ * @param D_T 时间间隔, 单位s
+ */
+Class_Matrix_f32<3, 1> Class_BMI088::Velocity_Function_F(const Class_Matrix_f32<3, 1> &Vector_X, const Class_Matrix_f32<3, 1> &Vector_U, const float &D_T)
+{
+    return (Vector_X + Vector_U * D_T);
+}
+
+/**
  * @brief 卡方检验
  *
  */
@@ -587,6 +602,35 @@ void Class_BMI088::Accel_Chi_Square_Calculate()
     matrix_d = matrix_h_x * EKF_Quaternion.Matrix_P_Prior * matrix_h_x.Get_Transpose() + EKF_Quaternion.Matrix_R;
 
     Accel_Chi_Square_Loss = (vector_error.Get_Transpose() * matrix_d.Get_Inverse() * vector_error)[0][0];
+}
+
+/**
+ * @brief 速度计算
+ *
+ * @param Now_Timestamp 当前时间戳, 单位us
+ */
+void Class_BMI088::Velocity_Calculate(const uint64_t &Now_Timestamp)
+{
+    if (Velocity_Pre_Valid_Timestamp == 0 || Now_Timestamp <= Velocity_Pre_Valid_Timestamp)
+    {
+        Velocity_Pre_Valid_Timestamp = Now_Timestamp;
+        return;
+    }
+
+    float d_t = (Now_Timestamp - Velocity_Pre_Valid_Timestamp) / 1000000.0f;
+    Velocity_Pre_Valid_Timestamp = Now_Timestamp;
+
+    if (d_t > D_T_TIMEOUT_THRESHOLD)
+    {
+        return;
+    }
+
+    if (Basic_Math_Is_Invalid_Float(Vector_Accel_Odom[0][0]) || Basic_Math_Is_Invalid_Float(Vector_Accel_Odom[1][0]) || Basic_Math_Is_Invalid_Float(Vector_Accel_Odom[2][0]))
+    {
+        return;
+    }
+
+    Vector_Velocity_Odom = Velocity_Function_F(Vector_Velocity_Odom, Vector_Accel_Odom, d_t);
 }
 
 /************************ COPYRIGHT(C) USTC-ROBOWALKER **************************/
