@@ -22,6 +22,7 @@
 #include "2_Device/BSP/Buzzer/bsp_buzzer.h"
 #include "2_Device/BSP/Power/bsp_power.h"
 #include "2_Device/BSP/Key/bsp_key.h"
+#include "2_Device/BSP/IMU/IMUTask.h"
 #include "1_Middleware/Algorithm/Filter/Kalman/alg_filter_kalman.h"
 #include "1_Middleware/Algorithm/Matrix/alg_matrix.h"
 #include "1_Middleware/Driver/WDG/drv_wdg.h"
@@ -131,6 +132,16 @@ void CAN1_Callback(FDCAN_RxHeaderTypeDef &Header, uint8_t *Buffer)
         break;
     }
     }
+}
+
+/**
+
+@brief imu_UART10回调函数
+
+*/
+void IMU_UART_Callback(uint8_t *Buffer,uint16_t Length)
+{
+    imu.UartRxCpltCallback(Buffer,Length);
 }
 
 /**
@@ -278,6 +289,7 @@ void Task1ms_Callback()
         BSP_BMI088.TIM_128ms_Calculate_PeriodElapsedCallback();
     }
 
+    imu.Handle();
     filter_kalman.Vector_Z[0][0] = motor.Get_Now_Angle();
     filter_kalman.Vector_Z[1][0] = motor.Get_Now_Omega();
     filter_kalman.TIM_Predict_PeriodElapsedCallback();
@@ -326,9 +338,15 @@ void Task1ms_Callback()
     float float_green = static_cast<float>(green);
     float float_blue = static_cast<float>(blue);
 
+    imu_t imuData = imu.GetData();
+    float imuYaw = imuData.yaw;
+    float imuPitch=imuData.pit;
+    float imuRoll=imuData.rol;
+
     // 串口绘图
     // IMU常规显示
-    Vofa_USB.Set_Data(23, &origin_accel_x, &origin_accel_y, &origin_accel_z, &origin_gyro_x, &origin_gyro_y, &origin_gyro_z, &q0, &q1, &q2, &q3, &yaw, &pitch, &roll, &temperature, &accel_x, &accel_y, &accel_z, &gyro_x, &gyro_y, &gyro_z, &loss, &calculating_time, &now_time);
+    //Vofa_USB.Set_Data(23, &origin_accel_x, &origin_accel_y, &origin_accel_z, &origin_gyro_x, &origin_gyro_y, &origin_gyro_z, &q0, &q1, &q2, &q3, &yaw, &pitch, &roll, &temperature, &accel_x, &accel_y, &accel_z, &gyro_x, &gyro_y, &gyro_z, &loss, &calculating_time, &now_time);
+    Vofa_USB.Set_Data(6,&yaw, &pitch, &roll,&accel_x,&accel_y,&accel_z);
     // Vofa_USB.Set_Data(7, &motor_target_angle, &motor_now_angle, &motor_target_omega, &motor_now_omega, &motor_target_torque, &motor_now_torque, &filter_omega);
     Vofa_USB.TIM_1ms_Write_PeriodElapsedCallback();
 
@@ -375,6 +393,7 @@ void Task_Init()
     // flash的OSPI
     OSPI_Init(&hospi2, OSPI2_Polling_Callback, OSPI2_Rx_Callback, OSPI2_Tx_Callback);
 
+    UART_Init(&huart10,IMU_UART_Callback);
     // 定时器中断初始化
     HAL_TIM_Base_Start_IT(&htim4);
     HAL_TIM_Base_Start_IT(&htim5);
@@ -393,6 +412,8 @@ void Task_Init()
     BSP_Key.Init();
 
     BSP_BMI088.Init();
+
+    imu.Reset();
 
     motor.PID_Angle.Init(12.0f, 0.0f, 0.0f, 0.0f, 10.0f, 10.0f);
     motor.PID_Omega.Init(0.03f, 5.0f, 0.0f, 0.0f, 0.2f, 0.2f);
